@@ -1,0 +1,94 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Facilities {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="card">
+      <div class="card-body">
+        <form role="form" method="post" action="" enctype="multipart/form-data">
+          <div class="form-group">
+            <label>Name</label>
+            {{ form.name }}
+          </div>
+          <div class="form-group">
+            <label>Stadium</label>
+            {{ form.stadium }}
+          </div>
+          <div>
+            <label>Cover Image</label>
+            <br>
+            {% if cover_image %}
+              <img id="cover_image_perview" src="{{ MEDIA_URL }}{{ cover_image }}">
+            {% endif %}
+            {{ form.cover_image }}
+          </div>
+          <br>
+          <div class="form-group">
+            <label>Location - longitude</label>
+            {{ form.longitude }}
+          </div>
+          <div class="form-group">
+            <label>Location - latitude</label>
+            {{ form.latitude }}
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <br>
+            {{form.media}}
+            {{ form.description }}
+          </div>
+
+          <br>
+          {% if form.errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        
+            {% for error in form.non_field_errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          {% endif %}
+          <br>
+
+          <div class="justify-content-center">
+            <button onclick="window.location.href = '/dashboard/facility/list'" type="button" class="btn">Back</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  $(document).ready(function() {
+    // perview image after upload
+    $("#id_cover_image").change(function() {
+      var files = event.target.files, file;
+      if (files && files.length > 0) {
+        file = files[0];
+        if (file.size > 1024 * 1024 * 10) {
+          // file size control, 10mb
+        }
+        var URL = window.URL || window.webkitURL;
+        var imgURL = URL.createObjectURL(file);
+        $("#cover_image_perview").attr("src", imgURL);
+      }
+    })
+  });
+</script>
+{% endblock javascripts %}

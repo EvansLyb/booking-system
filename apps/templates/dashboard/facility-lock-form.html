@@ -1,0 +1,90 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Lock / Unlock {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="card">
+      <div class="card-body">
+        <form role="form" method="post" action="">
+          <div class="form-group">
+            <label>Date</label>
+            {{ form.date }}
+          </div>
+          <div class="form-group">
+            <label>From</label>
+            {{ form.from_time }}
+          </div>
+          <div class="form-group">
+            <label>To</label>
+            {{ form.to_time }}
+          </div>
+
+          <br>
+          {% if form.errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        
+            {% for error in form.non_field_errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          {% endif %}
+          <br>
+
+          <div class="justify-content-center">
+            <button onclick="window.location.href = '/dashboard/facility/list'" type="button" class="btn">Back</button>
+            <button type="submit" class="btn btn-danger" formaction="?act=lock">Lock</button>
+            <button type="submit" class="btn btn-primary" formaction="?act=unlock">Unlock</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  $(document).ready(function() {
+    $('.fromtimepicker').datetimepicker({
+      datepicker: false,
+      format: 'H:i',
+      step: 30,
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          maxTime: $('.totimepicker').val() ? $('.totimepicker').val() : false
+        })
+      }
+    });
+    $('.totimepicker').datetimepicker({
+      datepicker: false,
+      format: 'H:i',
+      step: 30,
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          minTime: $('.fromtimepicker').val() ? $('.fromtimepicker').val() : false
+        })
+      }
+    });
+    $('.datepicker').datetimepicker({
+      timepicker: false,
+      format:'Y-m-d',
+      theme: 'dark',
+    });
+  });
+</script>
+{% endblock javascripts %}

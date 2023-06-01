@@ -1,0 +1,63 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Facilities {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="card">
+      <div class="card-body">
+        <form role="form" method="post" action="">
+          {{ form.as_p }}
+          <br>
+          {% if form.errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {% for error in form.non_field_errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          {% endif %}
+          <br>
+
+          <div class="justify-content-center">
+            <button onclick="window.location.href = '/dashboard/facility/{{fid}}/price/list'" type="button" class="btn">Back</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  $(document).ready(function() {
+    $('.datetimepicker').datetimepicker({
+      datepicker: false,
+      format: 'H:i',
+      step: 30,
+      theme: 'dark',
+    });
+    $('.price-input').on('input propertychange', function() {
+      this.value=this.value.toString().match(/^\d+(?:\.\d{0,2})?/);
+      if (this.value.indexOf('.') < 0 && this.value != '') {
+        this.value = parseFloat(this.value);
+      }
+    })
+  });
+</script>
+{% endblock javascripts %}

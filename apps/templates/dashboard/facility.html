@@ -1,0 +1,189 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Facilities {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card ">
+          <div class="card-header">
+            <button id="btn-create" type="button card-title" class="btn btn-primary">Create Facility</button>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table tablesorter " id="">
+                <thead class=" text-primary">
+                  <tr>
+                    <th>#</th>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Stadium</th>
+                    <th class="text-center">Cover Image</th>
+                    <th class="text-center">Longitude</th>
+                    <th class="text-center">Latitude</th>
+                    <th class="text-center">Lock Info</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for facility in facility_list %}
+                  <tr>
+                    <td>{{ facility.id }}</td>
+                    <td class="text-center">{{ facility.name }}</td>
+                    <td class="text-center">{{ facility.stadium }}</td>
+                    <td class="text-center" style="width: 12%;"><img src="{{ MEDIA_URL }}{{ facility.cover_image }}"></td>
+                    <td class="text-center">{{ facility.longitude }}</td>
+                    <td class="text-center">{{ facility.latitude }}</td>
+                    <td class="td-actions text-center">
+                      <button class="btn btn-primary btn-link btn-lock-info" data-id="{{ facility.id }}">Show Lock Status</button>
+                    </td>
+                    <td class="td-actions text-center">
+                      <button type="button" rel="tooltip" class="btn btn-warning btn-link btn-icon btn-sm btn-price" data-id="{{ facility.id }}">
+                        <i class="tim-icons icon-coins"></i>
+                      </button>
+                      <button type="button" rel="tooltip" class="btn btn-danger btn-link btn-icon btn-sm btn-lock" data-id="{{ facility.id }}">
+                        <i class="tim-icons icon-lock-circle"></i>
+                      </button>
+                      <button type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-id="{{ facility.id }}">
+                        <i class="tim-icons icon-settings"></i>
+                      </button>
+                      <button type="button" rel="tooltip" class="btn btn-danger btn-link btn-icon btn-sm btn-delete" data-toggle="modal" data-target="#deleteModal" data-id="{{ facility.id }}">
+                        <i class="tim-icons icon-simple-remove"></i>
+                      </button>
+                  </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {% if page_count > 0 %}
+          <div class="card-footer">
+            <ul class="pagination justify-content-center">
+              <li class="page-item {% if current_page|add:0 == 1 %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ current_page|add:-1 }}" tabindex="-1">Previous</a>
+              </li>
+              {% for n in page_range %}
+              <li class="page-item {% if n|add:0 == current_page|add:0 or n|add:0 == 1 and not current_page %}active{% endif %}">
+                <a class="page-link" href="?page={{ n }}">{{ n }}</a>
+              </li>
+              {% endfor %}
+              <li class="page-item {% if current_page|add:0 == page_count|add:0 %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ current_page|add:1 }}">Next</a>
+              </li>
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Modal - Delete -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Delete Facility</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            <i class="tim-icons icon-simple-remove"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          Want to Delete?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button id="delete" type="button" class="btn btn-primary">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal - Lock Info -->
+  <div class="modal fade modal-black" id="lock-info-modal" tabindex="-1" role="dialog" aria-labelledby="lock-info-modal-title" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="lock-info-modal-title">Lock Info</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            <i class="tim-icons icon-simple-remove"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="text-center">Date</th>
+                <th class="text-center">Slot</th>
+              </tr>
+            </thead>
+            <tbody id="lock-info-modal-table-body">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  $(document).ready(function() {
+    var deleteId = null
+
+    $("#btn-create").on("click", function() {
+      window.location.href = "/dashboard/facility"
+    })
+
+    $(".btn-price").on("click", function() {
+      var id = $(this).data("id")
+      window.location.href = "/dashboard/facility/" + id + "/price/list"
+    })
+
+    $(".btn-lock").on("click", function() {
+      var id = $(this).data("id")
+      window.location.href = "/dashboard/facility/" + id + "/lock"
+    })
+
+    $(".btn-edit").on("click", function() {
+      var id = $(this).data("id")
+      window.location.href = "/dashboard/facility/" + id
+    })
+
+    $(".btn-delete").on("click", function() {
+      deleteId = $(this).data("id")
+    })
+    $("#delete").on("click", function() {
+      fetch(`/dashboard/facility/${deleteId}`, {
+        method: "DELETE",
+      }).then(function(res) {
+        location.reload()
+      })
+    })
+
+    $(".btn-lock-info").on("click", function() {
+      var id = $(this).data("id")
+      fetch(`/dashboard/facility/${id}/lock/info`, {
+        method: "GET",
+      }).then(function(res) {
+        res.json().then(function(data) {
+          var json_data = JSON.parse(data)
+          var lockInfoModalTableBody = $("#lock-info-modal-table-body")
+          lockInfoModalTableBody.empty()
+          for (var i = 0; i < json_data.length; i++) {
+            var lockInfo = json_data[i].fields
+            lockInfoModalTableBody.append(`<tr><td class="text-center">${lockInfo.date}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td></tr>`)
+          }
+          $("#lock-info-modal").modal()
+        })
+      })
+    })
+  });
+</script>
+{% endblock javascripts %}

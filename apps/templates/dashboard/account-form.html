@@ -1,0 +1,93 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Accounts {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="card">
+      <div class="card-body">
+        <form role="form" method="post" action="">
+          <div class="form-group">
+            <label>Username</label>
+            {{ form.username }}
+            {% comment %} <input type="text" class="form-control" id="username" placeholder="Enter username"> {% endcomment %}
+          </div>
+          <div class="form-group">
+            <label>Email address</label>
+            {{ form.email }}
+            {% comment %} <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email"> {% endcomment %}
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            {{ form.password1 }}
+            {% comment %} <input type="password" class="form-control" id="password1" placeholder="Password"> {% endcomment %}
+          </div>
+          <div class="form-group">
+            <label>Confirm Password</label>
+            {{ form.password2 }}
+            {% comment %} <input type="password" class="form-control" id="password2" placeholder="Confirm Password"> {% endcomment %}
+          </div>
+          <div class="form-group">
+            <label>First Name</label>
+            {{ form.first_name }}
+            {% comment %} <input type="text" class="form-control" id="first-name" placeholder="Enter first name"> {% endcomment %}
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            {{ form.last_name }}
+            {% comment %} <input type="text" class="form-control" id="last-name" placeholder="Enter last name"> {% endcomment %}
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            {{ form.phone_number }}
+            {% comment %} <input type="text" class="form-control" id="phone-number" placeholder="Enter phone number"> {% endcomment %}
+          </div>
+
+          <div class="form-check">
+            <label class="form-check-label">
+              {% comment %} <input class="form-check-input" type="checkbox" value=""> {% endcomment %}
+              {{ form.is_super_admin }}
+              As Super Admin
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+            </label>
+          </div>
+
+          <br>
+          {% if form.errors %}
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        
+            {% for error in form.non_field_errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          {% endif %}
+          <br>
+
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  $(document).ready(function() {
+  });
+</script>
+{% endblock javascripts %}

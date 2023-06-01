@@ -1,0 +1,57 @@
+
+    <div class="sidebar">
+        <!--
+          Tip 1: You can change the color of the sidebar using: data-color="blue | green | orange | red"
+      -->
+        <div class="sidebar-wrapper">
+            <div class="logo">
+                <a href="javascript:void(0)" class="simple-text logo-normal">
+                    Booking System
+                </a>
+            </div>
+            <ul class="nav">
+                <li class="{% if 'account' in segment %} active {% endif %} ">
+                    <a href="/dashboard/account/list">
+                        <i class="tim-icons icon-chart-pie-36"></i>
+                        <p>Account Management</p>
+                    </a>
+                </li>
+                <li class="{% if 'facility' in segment %} active {% endif %}">
+                    <a href="/dashboard/facility/list">
+                        <i class="tim-icons icon-atom"></i>
+                        <p>Facility Management</p>
+                    </a>
+                </li>
+                <li class="{% if 'order' in segment %} active {% endif %}">
+                    <a href="/dashboard/order/list">
+                        <i class="tim-icons icon-pin"></i>
+                        <p>Order Management</p>
+                    </a>
+                </li>
+                <li class="{% if 'user' in segment %} active {% endif %}">
+                    <a href="/user.html">
+                        <i class="tim-icons icon-single-02"></i>
+                        <p>User Profile</p>
+                    </a>
+                </li>
+                <li class="{% if 'tables' in segment %} active {% endif %}">
+                    <a href="/tables.html">
+                        <i class="tim-icons icon-puzzle-10"></i>
+                        <p>Table List</p>
+                    </a>
+                </li>
+                <li class="{% if 'icons' in segment %} active {% endif %}">
+                    <a href="/icons.html">
+                        <i class="tim-icons icon-puzzle-10"></i>
+                        <p>Icons List</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'logout' %}">
+                        <i class="tim-icons icon-button-power"></i>
+                        <p>Logout</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>

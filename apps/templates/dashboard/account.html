@@ -1,0 +1,130 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Accounts {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card ">
+          <div class="card-header">
+            <button id="btn-create" type="button card-title" class="btn btn-primary">Create Account</button>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table tablesorter " id="">
+                <thead class=" text-primary">
+                  <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Phone Number</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for account in account_list %}
+                  <tr>
+                    <td>{{ account.id }}</td>
+                    <td>{{ account.username }}</td>
+                    <td>{{ account.first_name }} {{ account.last_name }}</td>
+                    {% if account.is_super_admin %}
+                    <td>Super Admin</td>
+                    {% else %}
+                    <td>Admin</td>
+                    {% endif %}
+                    <td>{{ account.phone_number }}</td>
+                    <td class="td-actions text-center">
+                      <button type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-id="{{ account.id }}">
+                        <i class="tim-icons icon-settings"></i>
+                      </button>
+                      {% if not account.is_super_admin %}
+                      <button type="button" rel="tooltip" class="btn btn-danger btn-link btn-icon btn-sm btn-delete" data-toggle="modal" data-target="#deleteModal" data-id="{{ account.id }}">
+                        <i class="tim-icons icon-simple-remove"></i>
+                      </button>
+                      {% endif %}
+                  </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {% if page_count > 0 %}
+          <div class="card-footer">
+            <ul class="pagination justify-content-center">
+              <li class="page-item {% if current_page|add:0 == 1 %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ current_page|add:-1 }}" tabindex="-1">Previous</a>
+              </li>
+              {% for n in page_range %}
+              <li class="page-item {% if n|add:0 == current_page|add:0 or n|add:0 == 1 and not current_page %}active{% endif %}">
+                <a class="page-link" href="?page={{ n }}">{{ n }}</a>
+              </li>
+              {% endfor %}
+              <li class="page-item {% if current_page|add:0 == page_count|add:0 %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ current_page|add:1 }}">Next</a>
+              </li>
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Delete Account</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+            <i class="tim-icons icon-simple-remove"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          Want to Delete?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button id="delete" type="button" class="btn btn-primary">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  $(document).ready(function() {
+    var deleteId = null
+
+    $("#btn-create").on("click", function() {
+      window.location.href = "/dashboard/account"
+    })
+
+    $(".btn-edit").on("click", function() {
+      var id = $(this).data("id")
+      window.location.href = "/dashboard/account/" + id
+    })
+
+    $(".btn-delete").on("click", function() {
+      deleteId = $(this).data("id")
+    })
+    $("#delete").on("click", function() {
+      fetch(`/dashboard/account/${deleteId}`, {
+        method: "DELETE",
+      }).then(function(res) {
+        location.reload()
+      })
+    })
+  });
+</script>
+{% endblock javascripts %}
