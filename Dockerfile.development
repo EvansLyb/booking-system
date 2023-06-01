@@ -6,6 +6,6 @@ RUN apk add ca-certificates
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositories && apk add --update --no-cache python3 py3-pip && rm -rf /var/cache/apk/*
 COPY . /app
 WORKDIR /app
-RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple && pip config set global.trusted-host mirrors.cloud.tencent.com && pip install --upgrade pip && pip install --user -r requirements.txt && python3 manage.py migrate
+RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple && pip config set global.trusted-host mirrors.cloud.tencent.com && pip install --upgrade pip && pip install --user -r requirements.txt && python3 manage.py migrate && python3 manage.py initadmin
 
 CMD [ "nodemon", "-x", "python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:80", "-w", "/app", "-e", "java, js, mjs, json, ts, cs, py, go"  ]

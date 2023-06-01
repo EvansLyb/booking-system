@@ -62,6 +62,13 @@ MIDDLEWARE = [
 ]
 
 AUTH_USER_MODEL = 'authentication.Account'
+# For createsuperuser management
+ADMINS = (
+    ('admin', 'admin@mysite.com'),
+)
+ADMIN_USERNAME = 'admin'
+ADMIN_EMAIL = 'admin@mysite.com'
+ADMIN_INITIAL_PASSWORD = 'admin' # To be changed after first login by admin
 
 ROOT_URLCONF = 'core.urls'
 LOGIN_REDIRECT_URL = "dashboard"  # Route defined in dashboard/urls.py
