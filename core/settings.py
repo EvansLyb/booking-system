@@ -21,7 +21,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY', default='S#perS3crEt_007')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = os.environ.get('DEBUG', True)
 
 # Assets Management
 ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets') 
@@ -105,10 +105,10 @@ if os.environ.get('DB_ENGINE') and os.environ.get('DB_ENGINE') == "mysql":
         'ENGINE'  : 'django.db.backends.mysql', 
         'NAME'    : os.getenv('DB_NAME'     , 'booking'),
         'USER'    : os.getenv('DB_USERNAME' , 'root'),
-        'PASSWORD': os.getenv('DB_PASS'     , 'pass'),
+        'PASSWORD': os.getenv('DB_PASSWORD'     , 'pass'),
         'HOST'    : os.getenv('DB_HOST'     , 'localhost'),
         'PORT'    : os.getenv('DB_PORT'     , 3306),
-        }, 
+        },
     }
 else:
     DATABASES = {
