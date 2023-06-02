@@ -15,12 +15,12 @@ services:
       - wxcloud=booking-system-service
       - role=container
     environment:
-      - MYSQL_USERNAME=root
-      - MYSQL_PASSWORD=book123@
-      - MYSQL_ADDRESS=10.18.111.68:3306
-      - MYSQL_USERNAME=
-      - MYSQL_PASSWORD=
-      - MYSQL_ADDRESS=
+      - DB_ENGINE=mysql
+      - DB_NAME=booking
+      - DB_USERNAME=root
+      - DB_PASSWORD=book123@
+      - DB_HOST=10.18.111.68:3306
+      - DB_PORT=3306
 networks:
   default:
     external:
