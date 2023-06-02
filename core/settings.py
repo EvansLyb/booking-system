@@ -101,14 +101,15 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 if os.environ.get('DB_ENGINE') and os.environ.get('DB_ENGINE') == "mysql":
     DATABASES = { 
-      'default': {
-        'ENGINE'  : 'django.db.backends.mysql', 
-        'NAME'    : os.getenv('DB_NAME'     , 'booking'),
-        'USER'    : os.getenv('DB_USERNAME' , 'root'),
-        'PASSWORD': os.getenv('DB_PASSWORD'     , 'pass'),
-        'HOST'    : os.getenv('DB_HOST'     , 'localhost'),
-        'PORT'    : os.getenv('DB_PORT'     , 3306),
-        },
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get("MYSQL_DATABASE", 'django_demo'),
+            'USER': os.environ.get("MYSQL_USERNAME"),
+            'HOST': os.environ.get("MYSQL_ADDRESS").split(':')[0],
+            'PORT': os.environ.get("MYSQL_ADDRESS").split(':')[1],
+            'PASSWORD': os.environ.get("MYSQL_PASSWORD"),
+            'OPTIONS': {'charset': 'utf8mb4'},
+        }
     }
 else:
     DATABASES = {

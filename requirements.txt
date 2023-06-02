@@ -14,5 +14,3 @@ django-environ==0.8.1
 django-cors-headers
 django-ckeditor==6.5.1
 Pillow
-mysqlclient==2.1.1
-
