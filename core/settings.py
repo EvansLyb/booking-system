@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'apps.authentication',
     'apps.dashboard',
+    'apps.apis',
     'ckeditor',
     'ckeditor_uploader'
 ]

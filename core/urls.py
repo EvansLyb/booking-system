@@ -16,10 +16,8 @@ urlpatterns = [
     # path('admin/', admin.site.urls),          # Django admin route
     path("", include("apps.authentication.urls")), # Auth routes - login / register
 
-    # ADD NEW Routes HERE
-
-    # Leave `Dashboard.Urls` as last the last line
     path("dashboard", include("apps.dashboard.urls"), name="dashboard"),
+    path("apis", include("apps.apis.urls"), name="apis"),
 
     # For Media
     re_path(r'^media/(?P<path>.*)$', serve, kwargs={'document_root': settings.MEDIA_ROOT}),
