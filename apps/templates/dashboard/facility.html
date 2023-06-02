@@ -25,6 +25,7 @@
                     <th class="text-center">Cover Image</th>
                     <th class="text-center">Longitude</th>
                     <th class="text-center">Latitude</th>
+                    <th class="text-center">Location</th>
                     <th class="text-center">Lock Info</th>
                     <th class="text-center">Actions</th>
                   </tr>
@@ -38,6 +39,7 @@
                     <td class="text-center" style="width: 12%;"><img src="{{ MEDIA_URL }}{{ facility.cover_image }}"></td>
                     <td class="text-center">{{ facility.longitude }}</td>
                     <td class="text-center">{{ facility.latitude }}</td>
+                    <td class="text-center">{{ facility.location }}</td>
                     <td class="td-actions text-center">
                       <button class="btn btn-primary btn-link btn-lock-info" data-id="{{ facility.id }}">Show Lock Status</button>
                     </td>

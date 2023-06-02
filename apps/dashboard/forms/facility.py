@@ -56,6 +56,14 @@ class FacilityForm(ModelForm):
                 "class": "form-control"
             }
         ))
+    location = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Location",
+                "class": "form-control"
+            }
+        ))
     description = forms.CharField(
         required=True,
         widget=CKEditorUploadingWidget(

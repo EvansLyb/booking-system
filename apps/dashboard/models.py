@@ -16,6 +16,7 @@ class Facility(models.Model):
     cover_image = models.ImageField('cover name', upload_to="facility/")
     longitude = models.FloatField('location - longitude')
     latitude = models.FloatField('location - latitude')
+    location = models.CharField('location', max_length=1024, blank=True)
     description = RichTextUploadingField('description')
 
 
