@@ -39,7 +39,7 @@ class StadiumForm(ModelForm):
             }
         ))
     location = forms.CharField(
-        required=False,
+        required=True,
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Location",

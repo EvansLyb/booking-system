@@ -21,11 +21,12 @@ from datetime import datetime, date, time, timedelta
 import math
 
 from apps.authentication.models import Account
-from .models import Facility, Price, LockInfo, Freeze
+from .models import Stadium, Facility, Price, LockInfo, Freeze
 from .forms.account import AccountForm
 from .forms.facility import FacilityForm
 from .forms.price import PriceForm
 from .forms.lock import LockForm
+from .forms.staduim import StadiumForm
 from .utils import merge_time_list, split_time, split_time_list
 
 
@@ -39,8 +40,7 @@ class AccountListView(LoginRequiredMixin, View):
     def get(self, request):
         context = {'segment': 'account'}
 
-        NUMBER_OF_PAGE = 25
-        account_list = Account.objects.all()
+        account_list = Account.objects.all().order_by('id')
         paginator = Paginator(account_list, NUMBER_OF_PAGE)
         # context - page
         current_page = request.GET.get("page")
@@ -96,6 +96,61 @@ class AccountView(LoginRequiredMixin, View):
         return HttpResponse("", status=204)
 
 
+class StadiumListView(LoginRequiredMixin, ListView):
+    model = Stadium
+    paginate_by = NUMBER_OF_PAGE
+    template_name = 'dashboard/stadium.html'
+
+    def get_queryset(self) -> QuerySet[Any]:
+        context = Stadium.objects.all()
+        return context
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class StadiumView(LoginRequiredMixin, View):
+    login_url = '/login'
+    redirect_field_name = 'redirect_to'
+
+    def get(self, request, id=None):
+        context = {}
+        if not id:
+            form = StadiumForm(request.POST or None)
+            html_template = loader.get_template('dashboard/stadium-form.html')
+            return HttpResponse(html_template.render({"form": form}, request))
+
+        stadium = Stadium.objects.get(id=id)
+
+        form = StadiumForm(request.POST or None, instance=stadium)
+        html_template = loader.get_template('dashboard/stadium-form.html')
+        return HttpResponse(html_template.render({"form": form}, request))
+
+    def post(self, request, id=None):
+        # create
+        if not id:
+            form = StadiumForm(request.POST or None)
+        # update
+        else:
+            stadium = Stadium.objects.get(id=id)
+            form = StadiumForm(request.POST or None, instance=stadium)
+
+        if form.is_valid():
+            stadium = form.save()
+            return redirect("/dashboard/stadium/list")
+
+        return render(request, "dashboard/stadium-form.html", {"form": form})
+
+    def delete(self, request, id):
+        try:
+            stadium = Stadium.objects.get(id=id)
+            stadium.delete()
+        except:
+            pass
+        return HttpResponse("", status=204)
+
+
 class FacilityListView(LoginRequiredMixin, View):
     login_url = '/login'
     redirect_field_name = 'redirect_to'
@@ -103,8 +158,7 @@ class FacilityListView(LoginRequiredMixin, View):
     def get(self, request):
         context = {'segment': 'facility'}
 
-        NUMBER_OF_PAGE = 25
-        facility_list = Facility.objects.all()
+        facility_list = Facility.objects.all().order_by('id')
         paginator = Paginator(facility_list, NUMBER_OF_PAGE)
         # context - page
         current_page = request.GET.get("page")

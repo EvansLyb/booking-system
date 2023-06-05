@@ -16,10 +16,11 @@ class Stadium(models.Model):
     latitude = models.FloatField('location - latitude')
     location = models.CharField('location', max_length=1024, blank=True)
 
+
 class Facility(models.Model):
     name = models.CharField('name', max_length=256, blank=False)
     cover_image = models.ImageField('cover name', upload_to="facility/")
-    description = RichTextUploadingField('description')
+    description = RichTextUploadingField('description', default='', blank=True)
 
 
 # Facility Court Type

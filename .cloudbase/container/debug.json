@@ -4,7 +4,8 @@
       "name": "booking-system-service",
       "domain": "",
       "ip": "",
-      "mode": "compose"
+      "mode": "compose",
+      "containerId": "6a16c1a8e76360dc0ccdcf235197ba3cb00377dc943335a0fae57775378327d3"
     }
   ],
   "config": {
