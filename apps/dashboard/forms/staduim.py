@@ -5,35 +5,17 @@ Copyright (c) 2019 - present Kyle
 
 from django import forms
 from django.forms import ModelForm
-from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
-from apps.dashboard.models import Facility
+from apps.dashboard.models import Stadium
 
 
-class FacilityForm(ModelForm):
+class StadiumForm(ModelForm):
     name = forms.CharField(
         required=True,
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Name",
                 "class": "form-control"
-            }
-        ))
-    stadium = forms.CharField(
-        required=True,
-        widget=forms.TextInput(
-            attrs={
-                "placeholder": "Stadium Name",
-                "class": "form-control"
-            }
-        ))
-    cover_image = forms.ImageField(
-        required=True,
-        label=False,
-        widget=forms.FileInput(
-            attrs={
-                "placeholder": "Cover Image",
-                "class": "file-loading"
             }
         ))
     longitude = forms.FloatField(
@@ -64,22 +46,7 @@ class FacilityForm(ModelForm):
                 "class": "form-control"
             }
         ))
-    description = forms.CharField(
-        required=False,
-        widget=CKEditorUploadingWidget(
-            attrs={
-                "placeholder": "description",
-                "class": "form-control"
-            }
-        ))
 
     class Meta:
-        model = Facility
+        model = Stadium
         fields = '__all__'
-
-    def save(self, commit=True):
-      facility = super(Facility, self).save(commit=False)
-      facility.description = self.cleaned_data.get('description', '')
-      if commit:
-        facility.save()
-      return facility

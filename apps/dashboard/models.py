@@ -10,13 +10,15 @@ from apps.authentication.models import Account
 
 # Create your models here.
 
-class Facility(models.Model):
+class Stadium(models.Model):
     name = models.CharField('name', max_length=256, blank=False)
-    stadium = models.CharField('stadium', max_length=256, blank=False)
-    cover_image = models.ImageField('cover name', upload_to="facility/")
     longitude = models.FloatField('location - longitude')
     latitude = models.FloatField('location - latitude')
     location = models.CharField('location', max_length=1024, blank=True)
+
+class Facility(models.Model):
+    name = models.CharField('name', max_length=256, blank=False)
+    cover_image = models.ImageField('cover name', upload_to="facility/")
     description = RichTextUploadingField('description')
 
 
