@@ -3,25 +3,110 @@
 {% block title %} Facilities {% endblock %} 
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+<style>
+  .image-preview-area {
+    display: flex;
+  }
+  .image-preview-area .delete-dot {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    top: 12px;
+    right: 12px;
+    transform: rotate(45deg);
+    cursor: pointer;
+  }
+  .image-preview-area .delete-dot::before {
+    display: block;
+    position: absolute;
+    content: "";
+    width: 10px;
+    height: 2px;
+    background-color: gray;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+  }
+  .image-preview-area .delete-dot::after {
+    display: block;
+    position: absolute;
+    content: "";
+    width: 2px;
+    height: 10px;
+    background-color: gray;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+  }
+  /* for file input */
+  .file-drop-area{
+    position: relative;
+    display: flex;
+    align-items: center;
+    /*width: 450px;*/
+    max-width: 100%;
+    padding:25px;
+    border: 1px dashed rgba(255,255,255,0.4);
+    border-radius: 3px;
+    transition: .2s;
+  }
+
+  .choose-file-button{
+    flex-shrink: 0;
+    background-color: rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius: 3px;
+    padding:8px 15px;
+    margin-right: 10px;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  .file-message{
+    font-size: small;
+    font-weight: 300;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-input{
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top:0;
+    height: 100%;
+    widows: 100%;
+    cursor: pointer;
+    opacity: 0;
+  }
+</style>
+{% endblock stylesheets %}
 
 {% block content %}
 
   <div class="content">
     <div class="card">
       <div class="card-body">
-        <form role="form" method="post" action="" enctype="multipart/form-data">
+        <form id="form" role="form" method="post" action="" enctype="multipart/form-data">
           <div class="form-group">
             <label>Name</label>
             {{ form.name }}
           </div>
           <div>
-            <label>Cover Image</label>
+            <label>Cover Image List</label>
             <br>
-            {% if cover_image %}
-              <img id="cover_image_perview" src="{{ MEDIA_URL }}{{ cover_image }}">
-            {% endif %}
-            {{ form.cover_image }}
+            <div id="divImageMediaPreview" class="image-preview-area">
+
+            </div>
+            <div class="file-drop-area">
+              <span class="choose-file-button">Choose Files</span>
+              <span class="file-message">or drag and drop files here</span>
+              <input id="cover_image_list" name="cover_image_list" type="file" class="file-input" accept=".jfif,.jpg,.jpeg,.png,.gif" multiple>
+            </div>
           </div>
           <br>
           <div class="form-group">
@@ -64,19 +149,92 @@
 {% block javascripts %}
 <script>
   $(document).ready(function() {
-    // perview image after upload
-    $("#id_cover_image").change(function() {
-      var files = event.target.files, file;
-      if (files && files.length > 0) {
-        file = files[0];
-        if (file.size > 1024 * 1024 * 10) {
-          // file size control, 10mb
-        }
-        var URL = window.URL || window.webkitURL;
-        var imgURL = URL.createObjectURL(file);
-        $("#cover_image_perview").attr("src", imgURL);
+    var curFiles = []
+    initCurFiles();
+
+    // file input
+    function initCurFiles() {
+      var facilityId = document.location.pathname.split('/').pop()
+      if (Number.isInteger(parseInt(facilityId))) {
+        fetch(`/dashboard/facility/${facilityId}/get-cover-image-list`, {
+          method: "GET",
+        }).then(function(res) {
+          res.json().then(async function(json_data) {
+            for (let i = 0; i < json_data.length; i++) {
+              let imageUrl = json_data[i].image
+              let id = json_data[i].id
+              let file = await getFileFromUrl(imageUrl)
+              appendFiles(file)
+            }
+          })
+        })
+      }
+    }
+    async function getFileFromUrl(url, name, defaultType = 'image/jpeg'){
+      const response = await fetch(url);
+      const data = await response.blob();
+      return new File([data], name, {
+        type: data.type || defaultType,
+      });
+    }
+
+    $('.file-input').change(async function() {
+			var filesCount = $(this)[0].files.length;
+			if (typeof (FileReader) != "undefined") {
+        appendFiles($(this)[0].files);
       }
     })
+
+    function appendFiles(files) {
+      var dvPreview = $("#divImageMediaPreview");
+      $(files).each(function () {
+        var file = $(this);     
+        var reader = new FileReader();
+        var randomId = +Date.now();
+        reader.onload = function (e) {
+          var imgWrapper = $("<div />")
+          var img = $("<img />");
+          var deleteDot = $("<span />")
+          imgWrapper.attr("style", "padding: 10px;position: relative;")
+          img.attr("style", "width: 150px;");
+          img.attr("src", e.target.result);
+          deleteDot.attr("class", "delete-dot")
+          imgWrapper.append(img)
+          imgWrapper.append(deleteDot)
+          dvPreview.append(imgWrapper);
+
+          // bind delete event
+          deleteDot.on("click", function() {
+            removeCurFileByRandomId(randomId)
+          })
+        }
+        Object.assign(file[0], {
+          randomId: randomId
+        })
+        reader.readAsDataURL(file[0]);
+        curFiles.push(file[0])
+      });
+      updateFileInputByCurFile(curFiles)
+    }
+
+    function removeCurFileByRandomId(randomId) {
+      var dvPreview = $("#divImageMediaPreview");
+      for (let i = 0; i < curFiles.length; i++) {
+        if (randomId == curFiles[i].randomId) {
+          dvPreview.children('div').eq(i).remove()
+          curFiles.splice(i, 1)
+        }
+      }
+      updateFileInputByCurFile(curFiles)
+    }
+
+    function updateFileInputByCurFile() {
+      var container = new DataTransfer();
+      for (let i = 0; i < curFiles.length; i++) {
+        container.items.add(curFiles[i]);
+      }
+      $('.file-input')[0].files = container.files
+    }
   });
 </script>
 {% endblock javascripts %}

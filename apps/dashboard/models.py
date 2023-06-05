@@ -19,8 +19,13 @@ class Stadium(models.Model):
 
 class Facility(models.Model):
     name = models.CharField('name', max_length=256, blank=False)
-    cover_image = models.ImageField('cover name', upload_to="facility/")
+    # cover_image = models.ImageField('cover name', upload_to="facility/")
     description = RichTextUploadingField('description', default='', blank=True)
+
+
+class FacilityCoverImage(models.Model):
+    facility = models.ForeignKey(Facility, on_delete=models.SET_NULL, null=True, blank=True)
+    image = models.ImageField(upload_to="facility/")
 
 
 # Facility Court Type

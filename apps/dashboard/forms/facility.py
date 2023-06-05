@@ -7,7 +7,7 @@ from django import forms
 from django.forms import ModelForm
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
-from apps.dashboard.models import Facility
+from apps.dashboard.models import Facility, FacilityCoverImage
 
 
 class FacilityForm(ModelForm):
@@ -19,15 +19,16 @@ class FacilityForm(ModelForm):
                 "class": "form-control"
             }
         ))
-    cover_image = forms.ImageField(
-        required=True,
-        label=False,
-        widget=forms.FileInput(
-            attrs={
-                "placeholder": "Cover Image",
-                "class": "file-loading"
-            }
-        ))
+    # cover_image_list = forms.ImageField(
+    #     required=True,
+    #     label=False,
+    #     widget=forms.ClearableFileInput(
+    #         attrs={
+    #             "placeholder": "Cover Image List",
+    #             "class": "file-loading",
+    #             "multiple": True
+    #         }
+    #     ))
     description = forms.CharField(
         required=False,
         widget=CKEditorUploadingWidget(

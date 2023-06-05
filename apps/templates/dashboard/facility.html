@@ -21,7 +21,7 @@
                   <tr>
                     <th>#</th>
                     <th class="text-center">Name</th>
-                    <th class="text-center">Cover Image</th>
+                    <th class="text-center" style="width: 38%;">Cover Image</th>
                     <th class="text-center">Lock Info</th>
                     <th class="text-center">Actions</th>
                   </tr>
@@ -31,7 +31,11 @@
                   <tr>
                     <td>{{ facility.id }}</td>
                     <td class="text-center">{{ facility.name }}</td>
-                    <td class="text-center" style="width: 12%;"><img src="{{ MEDIA_URL }}{{ facility.cover_image }}"></td>
+                    <td class="text-center" style="display:flex;flex-wrap:wrap;">
+                      {% for cover_image in facility.cover_image_list %}
+                      <img style="width: 49%;" src="{{ MEDIA_URL }}{{ cover_image }}">
+                      {% endfor %}
+                    </td>
                     <td class="td-actions text-center">
                       <button class="btn btn-primary btn-link btn-lock-info" data-id="{{ facility.id }}">Show Lock Status</button>
                     </td>

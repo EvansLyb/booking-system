@@ -11,6 +11,7 @@ from django.views.generic.list import ListView
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.serializers import serialize
 from django.template import loader
@@ -21,7 +22,7 @@ from datetime import datetime, date, time, timedelta
 import math
 
 from apps.authentication.models import Account
-from .models import Stadium, Facility, Price, LockInfo, Freeze
+from .models import Stadium, Facility, Price, LockInfo, Freeze, FacilityCoverImage
 from .forms.account import AccountForm
 from .forms.facility import FacilityForm
 from .forms.price import PriceForm
@@ -168,6 +169,10 @@ class FacilityListView(LoginRequiredMixin, View):
         context['page_range'] = range(1, page_count + 1)
         # context - obj
         page_obj = paginator.get_page(current_page)
+        # inject cover image
+        for idx, facility in enumerate(page_obj):
+            cover_image_list = FacilityCoverImage.objects.filter(facility=facility)
+            page_obj[idx].cover_image_list = [cover_image.image for cover_image in cover_image_list]
         context['facility_list'] = page_obj
 
         html_template = loader.get_template('dashboard/facility.html')
@@ -186,14 +191,13 @@ class FacilityView(LoginRequiredMixin, View):
             return HttpResponse(html_template.render({"form": form}, request))
 
         facility = Facility.objects.get(id=id)
-        # cover image
-        cover_image = facility.cover_image
 
         form = FacilityForm(request.POST or None, request.FILES or None, instance=facility)
         html_template = loader.get_template('dashboard/facility-form.html')
-        return HttpResponse(html_template.render({"form": form, "cover_image": cover_image}, request))
+        return HttpResponse(html_template.render({"form": form}, request))
 
     def post(self, request, id=None):
+
         # create
         if not id:
             form = FacilityForm(request.POST or None, request.FILES or None)
@@ -204,6 +208,12 @@ class FacilityView(LoginRequiredMixin, View):
 
         if form.is_valid():
             facility = form.save()
+            # delete old cover images
+            FacilityCoverImage.objects.filter(facility=facility).delete()
+            # reset cover images
+            cover_image_list = request.FILES.getlist('cover_image_list')
+            for image in cover_image_list:
+                FacilityCoverImage.objects.create(facility=facility, image=image)
             return redirect("/dashboard/facility/list")
 
         return render(request, "dashboard/facility-form.html", {"form": form})
@@ -379,7 +389,6 @@ class LockView(LoginRequiredMixin, View):
                 )
             lock_info.save()
             return redirect("/dashboard/facility/list")
-        print(form.errors)
         if form.is_valid() and act == 'unlock':
             date = form.cleaned_data['date']
             from_time = form.cleaned_data['from_time']
@@ -427,6 +436,40 @@ def get_lock_info(request, fid=None):
         serialized_data = serialize("json", lock_info_list)
         return JsonResponse(serialized_data, safe=False)
 
+
+def get_cover_image_list(request, fid=None):
+    if request.method == 'GET':
+        cover_image_list = FacilityCoverImage.objects.filter(facility__pk=fid)
+        result = []
+        for cover_image in cover_image_list:
+            result.append({
+                "id": cover_image.id,
+                "image": cover_image.image.url
+            })
+        return JsonResponse(result, safe=False)
+
+
+@login_required(login_url="/login")
+def post_cover_image(request, fid=None):
+    if (request.method == 'POST' and fid):
+        cover_image_list = request.FILES.getlist('cover_image_list')
+        facility = Facility.objects.filter(id=fid).first()
+        print('--')
+        print(facility)
+        for image in cover_image_list:
+            FacilityCoverImage.objects.create(facility=facility, image=image)
+        return HttpResponse("", status=201)
+
+
+@login_required(login_url="/login")
+def delete_cover_image(request, id=None):
+    if (request.method == 'DELETE'):
+        try:
+            cover_image = FacilityCoverImage.objects.get(id=id)
+            cover_image.delete()
+        except:
+            pass
+        return HttpResponse("", status=204)
 
 
 @login_required(login_url="/login")
