@@ -12,18 +12,7 @@
       <div class="card-body">
         <form role="form" method="post" action="">
           <div class="form-group">
-            <label>Date</label>
-            {{ form.date }}
-          </div>
-          <div class="form-group">
-            <label>From</label>
-            {{ form.from_time }}
-          </div>
-          <div class="form-group">
-            <label>To</label>
-            {{ form.to_time }}
-          </div>
-
+          {{ form.as_p }}
           <br>
           {% if form.errors %}
             {% for field in form %}
@@ -45,7 +34,6 @@
           <div class="justify-content-center">
             <button onclick="window.location.href = '/dashboard/facility/list'" type="button" class="btn">Back</button>
             <button type="submit" class="btn btn-danger" formaction="?act=lock">Lock</button>
-            <button type="submit" class="btn btn-primary" formaction="?act=unlock">Unlock</button>
           </div>
         </form>
       </div>

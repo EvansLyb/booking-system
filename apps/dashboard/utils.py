@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 """
 For Lock Info
 input: ["01:30-03:20", "10:05-13:31", "06:56-07:59", "17:30-24:00", "13:12-19:20", "18:20-23:00"]
@@ -76,6 +78,11 @@ def split_time_list(time_slot_list, unlock_time_slot):
 
 def split_time(time):
     return tuple(time.split('-'))
+
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days) + 1):
+        yield start_date + timedelta(n)
 
 
 # if __name__ == '__main__':

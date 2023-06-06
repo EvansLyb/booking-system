@@ -116,7 +116,8 @@
             <thead>
               <tr>
                 <th class="text-center">Date</th>
-                <th class="text-center">Slot</th>
+                <th class="text-center">Time</th>
+                <th class="text-center">Action</th>
               </tr>
             </thead>
             <tbody id="lock-info-modal-table-body">
@@ -132,6 +133,13 @@
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <script>
+  function handleUnlock(fid, lockId, el) {
+    fetch(`/dashboard/facility/${fid}/unlock/${lockId}`, {
+      method: "DELETE",
+    }).then(function(res) {
+    })
+  }
+
   $(document).ready(function() {
     var deleteId = null
 
@@ -166,8 +174,8 @@
     })
 
     $(".btn-lock-info").on("click", function() {
-      var id = $(this).data("id")
-      fetch(`/dashboard/facility/${id}/lock/info`, {
+      var fid = $(this).data("id")
+      fetch(`/dashboard/facility/${fid}/lock/info`, {
         method: "GET",
       }).then(function(res) {
         res.json().then(function(data) {
@@ -176,7 +184,9 @@
           lockInfoModalTableBody.empty()
           for (var i = 0; i < json_data.length; i++) {
             var lockInfo = json_data[i].fields
-            lockInfoModalTableBody.append(`<tr><td class="text-center">${lockInfo.date}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td></tr>`)
+            var lockId = json_data[i].pk
+            var formattedDate = lockInfo.from_date == lockInfo.to_date ? lockInfo.from_date : `${lockInfo.from_date} ~ ${lockInfo.to_date}`
+            lockInfoModalTableBody.append(`<tr><td class="text-center">${formattedDate}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td><td class="text-center"><button class="btn btn-primary btn-link btn-lock-info" data-dismiss="modal" onclick='handleUnlock(${fid}, ${lockId})'>unlock</button></td></tr>`)
           }
           $("#lock-info-modal").modal()
         })

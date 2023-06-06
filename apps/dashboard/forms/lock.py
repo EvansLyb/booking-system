@@ -10,11 +10,19 @@ from django.core.exceptions import ValidationError
 
 
 class LockForm(Form):
-    date = forms.DateField(
+    from_date = forms.DateField(
         required=True,
         widget=forms.DateInput(
             attrs={
-                "placeholder": "Date",
+                "placeholder": "From Date",
+                "class": "form-control datepicker"
+            },
+        ))
+    to_date = forms.DateField(
+        required=True,
+        widget=forms.DateInput(
+            attrs={
+                "placeholder": "To Date",
                 "class": "form-control datepicker"
             },
         ))
@@ -22,7 +30,7 @@ class LockForm(Form):
         required=True,
         widget=forms.TimeInput(
             attrs={
-                "placeholder": "From",
+                "placeholder": "From Time",
                 "class": "form-control fromtimepicker"
             },
             format="%H:%M"
@@ -31,12 +39,12 @@ class LockForm(Form):
         required=True,
         widget=forms.TimeInput(
             attrs={
-                "placeholder": "To",
+                "placeholder": "To Time",
                 "class": "form-control totimepicker"
             },
             format="%H:%M"
         ))
-    
+
     def clean(self) -> Dict[str, Any]:
         cleaned_data = super().clean()
         from_time = cleaned_data.get('from_time')

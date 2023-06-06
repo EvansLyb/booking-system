@@ -23,6 +23,7 @@ urlpatterns = [
     path('/facility/<int:fid>/price/<int:pid>', PriceView.as_view(), name='dashboard_facility_price'),
     path('/facility/<int:fid>/get-cover-image-list', get_cover_image_list, name='dashboard_facility_get_cover_image_list'),
     path('/facility/<int:fid>/lock', LockView.as_view()),
+    path('/facility/<int:fid>/unlock/<int:lid>', LockView.as_view()),
     path('/facility/<int:fid>/lock/info', get_lock_info, name='dashboard_lock_info'),
     path('/facility/<int:fid>/post-cover-image', post_cover_image, name='post_cover_image'),
     path('/delete-cover-image/<int:id>', delete_cover_image, name='delete_cover_image'),

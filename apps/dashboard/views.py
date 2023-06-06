@@ -28,7 +28,7 @@ from .forms.facility import FacilityForm
 from .forms.price import PriceForm
 from .forms.lock import LockForm
 from .forms.staduim import StadiumForm
-from .utils import merge_time_list, split_time, split_time_list
+from .utils import merge_time_list, split_time, split_time_list, daterange
 
 
 NUMBER_OF_PAGE = 25
@@ -354,41 +354,48 @@ class LockView(LoginRequiredMixin, View):
         form = LockForm(request.POST or None)
         act = request.GET.get("act")
         if form.is_valid() and act == 'lock':
-            date = form.cleaned_data['date']
+            from_date = form.cleaned_data['from_date']
+            to_date = form.cleaned_data['to_date']
             from_time = form.cleaned_data['from_time']
             to_time = form.cleaned_data['to_time']
             from_time_str = from_time.isoformat(timespec='minutes')
             to_time_str = to_time.isoformat(timespec='minutes')
             delta = timedelta(minutes=30)
-            d = datetime.strptime(from_time_str, '%H:%M')
-            while d < datetime.strptime(to_time_str, '%H:%M'):
-                Freeze.objects.update_or_create(
-                    facility_id=fid,
-                    date=date,
-                    time=d,
-                    defaults={
-                        'facility_id': fid,
-                        'date': date,
-                        'is_lock': True,
-                        'time': time(hour=d.hour, minute=d.minute)
-                    }
-                )
-                d += delta
-            # merge lock info
-            lock_info = LockInfo.objects.filter(facility_id=fid, date=date).first()
-            if lock_info:
-                slot_list = lock_info.slot.split(', ')
-                slot_list.append("{}-{}".format(from_time_str, to_time_str))  # append the new slot
-                merged_slot_list = merge_time_list(slot_list)  # merge slot
-                lock_info.slot = ', '.join(merged_slot_list)
-            else:
-                lock_info = LockInfo(
-                    facility_id=fid,
-                    date=date,
-                    slot="{}-{}".format(from_time_str, to_time_str)
-                )
+
+            for single_date in daterange(from_date, to_date):
+                d = datetime.strptime(from_time_str, '%H:%M')
+                while d < datetime.strptime(to_time_str, '%H:%M'):
+                    freeze = Freeze.objects.filter(facility_id=fid, date=single_date, time=time(hour=d.hour, minute=d.minute)).first()
+                    if freeze:
+                        freeze.lock_count = freeze.lock_count + 1
+                        freeze.is_lock = True
+                    else:
+                        freeze = Freeze(
+                            facility_id=fid,
+                            date=single_date,
+                            time=time(hour=d.hour, minute=d.minute),
+                            is_lock=True,
+                            lock_count=1
+                        )
+                    freeze.save()
+                    d += delta
+
+            # Lock Info Model
+            lock_info = LockInfo(
+                facility_id=fid,
+                from_date=from_date,
+                to_date=to_date,
+                slot="{}-{}".format(from_time_str, to_time_str),
+                operator=request.user.username  # set operator
+            )
             lock_info.save()
             return redirect("/dashboard/facility/list")
+        
+        """
+        ================
+         - deprecated
+        ================
+        """
         if form.is_valid() and act == 'unlock':
             date = form.cleaned_data['date']
             from_time = form.cleaned_data['from_time']
@@ -423,6 +430,35 @@ class LockView(LoginRequiredMixin, View):
                     lock_info.save()
             return redirect("/dashboard/facility/list")
         return render(request, "dashboard/facility-lock-form.html", {"form": form})
+    
+    def delete(self, request, fid=None, lid=None):
+        lock_info = LockInfo.objects.filter(id=lid).first()
+        from_date = lock_info.from_date
+        to_date = lock_info.to_date
+        slot = lock_info.slot
+        from_time_str, to_time_str = split_time(slot)
+        delta = timedelta(minutes=30)
+        for single_date in daterange(from_date, to_date):
+            d = datetime.strptime(from_time_str, '%H:%M')
+            while d < datetime.strptime(to_time_str, '%H:%M'):
+                freeze = Freeze.objects.filter(facility_id=fid, date=single_date, time=time(hour=d.hour, minute=d.minute)).first()
+                if freeze:
+                    freeze.lock_count = freeze.lock_count - 1
+                    if freeze.lock_count <= 0:
+                        if freeze.is_order:
+                            freeze.is_lock = False
+                            freeze.save()
+                        else:
+                            freeze.delete()
+                    else:
+                        freeze.save()
+                d += delta
+
+        # Delete Lock Info
+        lock_info = LockInfo.objects.filter(id=lid).first()
+        lock_info.delete()
+
+        return HttpResponse("", status=204)
 
 
 @login_required(login_url="/login")
@@ -431,8 +467,8 @@ def get_lock_info(request, fid=None):
         today = date.today()
         lock_info_list = LockInfo.objects.filter(
             facility_id=fid,
-            date__gte=today,
-        ).order_by('date')
+            to_date__gte=today,
+        ).order_by('to_date')
         serialized_data = serialize("json", lock_info_list)
         return JsonResponse(serialized_data, safe=False)
 
@@ -454,8 +490,6 @@ def post_cover_image(request, fid=None):
     if (request.method == 'POST' and fid):
         cover_image_list = request.FILES.getlist('cover_image_list')
         facility = Facility.objects.filter(id=fid).first()
-        print('--')
-        print(facility)
         for image in cover_image_list:
             FacilityCoverImage.objects.create(facility=facility, image=image)
         return HttpResponse("", status=201)

@@ -5,8 +5,8 @@ Copyright (c) 2019 - present Kyle
 
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
+import datetime
 
-from apps.authentication.models import Account
 
 # Create your models here.
 
@@ -54,8 +54,10 @@ class Price(models.Model):
 
 class LockInfo(models.Model):
     facility_id = models.BigIntegerField('facility_id', blank=False)
-    date = models.DateField('date')
+    from_date = models.DateField('from_date', default=datetime.date.today)
+    to_date = models.DateField('to_date', default=datetime.date.today)
     slot = models.CharField('slot', max_length=255, blank=False)  # just for display
+    operator = models.CharField('operator', max_length=255, blank=True)
 
 
 class Freeze(models.Model):
@@ -63,6 +65,11 @@ class Freeze(models.Model):
     date = models.DateField('date')
     court_type = models.CharField(max_length=255, choices=CourtType.choices, default=None, null=True, blank=True)
     is_lock = models.BooleanField(default=False)
+    """
+    - Lock once, increment the count by 1
+    - Unlock once, decrement the count by 1.
+    """
+    lock_count = models.IntegerField('lock_count', default=0)
     is_order = models.BooleanField(default=False)
     time = models.TimeField()  # start time, slot=30min
 
