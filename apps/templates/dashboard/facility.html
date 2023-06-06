@@ -117,6 +117,7 @@
               <tr>
                 <th class="text-center">Date</th>
                 <th class="text-center">Time</th>
+                <th class="text-center">Operator</th>
                 <th class="text-center">Action</th>
               </tr>
             </thead>
@@ -186,7 +187,7 @@
             var lockInfo = json_data[i].fields
             var lockId = json_data[i].pk
             var formattedDate = lockInfo.from_date == lockInfo.to_date ? lockInfo.from_date : `${lockInfo.from_date} ~ ${lockInfo.to_date}`
-            lockInfoModalTableBody.append(`<tr><td class="text-center">${formattedDate}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td><td class="text-center"><button class="btn btn-primary btn-link btn-lock-info" data-dismiss="modal" onclick='handleUnlock(${fid}, ${lockId})'>unlock</button></td></tr>`)
+            lockInfoModalTableBody.append(`<tr><td class="text-center">${formattedDate}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td><td class="text-center">${lockInfo.operator}</td><td class="text-center"><button class="btn btn-primary btn-link btn-lock-info" data-dismiss="modal" onclick='handleUnlock(${fid}, ${lockId})'>unlock</button></td></tr>`)
           }
           $("#lock-info-modal").modal()
         })
