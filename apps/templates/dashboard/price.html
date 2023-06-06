@@ -42,11 +42,11 @@
                     <td>{{ price.opening_time }}</td>
                     <td>{{ price.closing_time }}</td>
                     <td class="td-actions text-center">
-                      <button type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-id="{{ price.id }}">
+                      <button type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-id="{{ price.id }}" data-toggle="tooltip" data-placement="top" title="Edit">
                         <i class="tim-icons icon-settings"></i>
                       </button>
                       {% if not price.is_super_admin %}
-                      <button type="button" rel="tooltip" class="btn btn-danger btn-link btn-icon btn-sm btn-delete" data-toggle="modal" data-target="#deleteModal" data-id="{{ price.id }}">
+                      <button type="button" rel="tooltip" class="btn btn-danger btn-link btn-icon btn-sm btn-delete" data-toggle="modal" data-target="#deleteModal" data-id="{{ price.id }}" data-toggle="tooltip" data-placement="top" title="Delete">
                         <i class="tim-icons icon-simple-remove"></i>
                       </button>
                       {% endif %}

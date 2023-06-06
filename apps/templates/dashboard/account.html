@@ -40,11 +40,11 @@
                     {% endif %}
                     <td>{{ account.phone_number }}</td>
                     <td class="td-actions text-center">
-                      <button type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-id="{{ account.id }}">
+                      <button type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-id="{{ account.id }}" data-toggle="tooltip" data-placement="top" title="Edit">
                         <i class="tim-icons icon-settings"></i>
                       </button>
                       {% if not account.is_super_admin %}
-                      <button type="button" rel="tooltip" class="btn btn-danger btn-link btn-icon btn-sm btn-delete" data-toggle="modal" data-target="#deleteModal" data-id="{{ account.id }}">
+                      <button type="button" rel="tooltip" class="btn btn-danger btn-link btn-icon btn-sm btn-delete" data-toggle="modal" data-target="#deleteModal" data-id="{{ account.id }}" data-toggle="tooltip" data-placement="top" title="Delete">
                         <i class="tim-icons icon-simple-remove"></i>
                       </button>
                       {% endif %}
