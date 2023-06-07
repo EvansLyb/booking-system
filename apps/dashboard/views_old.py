@@ -344,153 +344,154 @@ class PriceView(LoginRequiredMixin, View):
         return HttpResponse("", status=204)
 
 
-class LockView(LoginRequiredMixin, View):
-    login_url = '/login'
-    redirect_field_name = 'redirect_to'
+# class LockView(LoginRequiredMixin, View):
+#     login_url = '/login'
+#     redirect_field_name = 'redirect_to'
 
-    def get(self, request, fid=None):
-        if not fid:
-            return HttpResponseRedirect('404', status=404)
+#     def get(self, request, fid=None):
+#         if not fid:
+#             return HttpResponseRedirect('404', status=404)
 
-        form = LockForm(request.POST or None)
-        html_template = loader.get_template('dashboard/facility-lock-form.html')
-        return HttpResponse(html_template.render({"form": form}, request))
+#         form = LockForm(request.POST or None)
+#         html_template = loader.get_template('dashboard/facility-lock-form.html')
+#         return HttpResponse(html_template.render({"form": form}, request))
 
-    def post(self, request, fid=None):
-        form = LockForm(request.POST or None)
-        act = request.GET.get("act")
-        if form.is_valid() and act == 'lock':
-            from_date = form.cleaned_data['from_date']
-            to_date = form.cleaned_data['to_date']
-            from_time = form.cleaned_data['from_time']
-            to_time = form.cleaned_data['to_time']
-            from_time_str = from_time.isoformat(timespec='minutes')
-            to_time_str = to_time.isoformat(timespec='minutes')
-            delta = timedelta(minutes=30)
+#     def post(self, request, fid=None):
+#         form = LockForm(request.POST or None)
+#         act = request.GET.get("act")
+#         if form.is_valid() and act == 'lock':
+#             from_date = form.cleaned_data['from_date']
+#             to_date = form.cleaned_data['to_date']
+#             from_time = form.cleaned_data['from_time']
+#             to_time = form.cleaned_data['to_time']
+#             from_time_str = from_time.isoformat(timespec='minutes')
+#             to_time_str = to_time.isoformat(timespec='minutes')
+#             delta = timedelta(minutes=30)
 
-            for single_date in daterange(from_date, to_date):
-                d = datetime.strptime(from_time_str, '%H:%M')
-                while d < datetime.strptime(to_time_str, '%H:%M'):
-                    freeze = Freeze.objects.filter(facility_id=fid, date=single_date, time=time(hour=d.hour, minute=d.minute)).first()
-                    if freeze:
-                        freeze.lock_count = freeze.lock_count + 1
-                        freeze.is_lock = True
-                    else:
-                        freeze = Freeze(
-                            facility_id=fid,
-                            date=single_date,
-                            time=time(hour=d.hour, minute=d.minute),
-                            is_lock=True,
-                            lock_count=1
-                        )
-                    freeze.save()
-                    d += delta
+#             for single_date in daterange(from_date, to_date):
+#                 d = datetime.strptime(from_time_str, '%H:%M')
+#                 while d < datetime.strptime(to_time_str, '%H:%M'):
+#                     freeze = Freeze.objects.filter(facility_id=fid, date=single_date, time=time(hour=d.hour, minute=d.minute)).first()
+#                     if freeze:
+#                         freeze.lock_count = freeze.lock_count + 1
+#                         freeze.is_lock = True
+#                     else:
+#                         freeze = Freeze(
+#                             facility_id=fid,
+#                             date=single_date,
+#                             time=time(hour=d.hour, minute=d.minute),
+#                             is_lock=True,
+#                             lock_count=1
+#                         )
+#                     freeze.save()
+#                     d += delta
 
-            # Lock Info Model
-            lock_info = LockInfo(
-                facility_id=fid,
-                from_date=from_date,
-                to_date=to_date,
-                slot="{}-{}".format(from_time_str, to_time_str),
-                operator=request.user.username  # set operator
-            )
-            lock_info.save()
-            return redirect("/dashboard/facility/list")
+#             # Lock Info Model
+#             lock_info = LockInfo(
+#                 facility_id=fid,
+#                 from_date=from_date,
+#                 to_date=to_date,
+#                 slot="{}-{}".format(from_time_str, to_time_str),
+#                 operator=request.user.username  # set operator
+#             )
+#             lock_info.save()
+#             return redirect("/dashboard/facility/list")
         
-        """
-        ================
-         - deprecated
-        ================
-        """
-        if form.is_valid() and act == 'unlock':
-            date = form.cleaned_data['date']
-            from_time = form.cleaned_data['from_time']
-            to_time = form.cleaned_data['to_time']
-            from_time_str = from_time.isoformat(timespec='minutes')
-            to_time_str = to_time.isoformat(timespec='minutes')
-            delta = timedelta(minutes=30)
-            d = datetime.strptime(from_time_str, '%H:%M')
-            while d < datetime.strptime(to_time_str, '%H:%M'):
-                freeze = Freeze.objects.filter(
-                    facility_id=fid,
-                    date=date,
-                    time=d,
-                    is_lock=True
-                ).first()
-                if freeze:
-                    if freeze.is_order:
-                        freeze.is_lock = False
-                        freeze.save()
-                    else:
-                        freeze.delete()
-                d += delta
-            # split lock info
-            lock_info = LockInfo.objects.filter(facility_id=fid, date=date).first()
-            if lock_info:
-                slot_list = lock_info.slot.split(', ')
-                splited_slot_list = split_time_list(slot_list, "{}-{}".format(from_time_str, to_time_str))  # split slot
-                if len(splited_slot_list) == 0:
-                    lock_info.delete()
-                else:
-                    lock_info.slot = ', '.join(splited_slot_list)
-                    lock_info.save()
-            return redirect("/dashboard/facility/list")
-        return render(request, "dashboard/facility-lock-form.html", {"form": form})
+#         """
+#         ================
+#          - deprecated
+#         ================
+#         """
+#         if form.is_valid() and act == 'unlock':
+#             date = form.cleaned_data['date']
+#             from_time = form.cleaned_data['from_time']
+#             to_time = form.cleaned_data['to_time']
+#             from_time_str = from_time.isoformat(timespec='minutes')
+#             to_time_str = to_time.isoformat(timespec='minutes')
+#             delta = timedelta(minutes=30)
+#             d = datetime.strptime(from_time_str, '%H:%M')
+#             while d < datetime.strptime(to_time_str, '%H:%M'):
+#                 freeze = Freeze.objects.filter(
+#                     facility_id=fid,
+#                     date=date,
+#                     time=d,
+#                     is_lock=True
+#                 ).first()
+#                 if freeze:
+#                     if freeze.is_order:
+#                         freeze.is_lock = False
+#                         freeze.save()
+#                     else:
+#                         freeze.delete()
+#                 d += delta
+#             # split lock info
+#             lock_info = LockInfo.objects.filter(facility_id=fid, date=date).first()
+#             if lock_info:
+#                 slot_list = lock_info.slot.split(', ')
+#                 splited_slot_list = split_time_list(slot_list, "{}-{}".format(from_time_str, to_time_str))  # split slot
+#                 if len(splited_slot_list) == 0:
+#                     lock_info.delete()
+#                 else:
+#                     lock_info.slot = ', '.join(splited_slot_list)
+#                     lock_info.save()
+#             return redirect("/dashboard/facility/list")
+#         return render(request, "dashboard/facility-lock-form.html", {"form": form})
     
-    def delete(self, request, fid=None, lid=None):
-        lock_info = LockInfo.objects.filter(id=lid).first()
-        from_date = lock_info.from_date
-        to_date = lock_info.to_date
-        slot = lock_info.slot
-        from_time_str, to_time_str = split_time(slot)
-        delta = timedelta(minutes=30)
-        for single_date in daterange(from_date, to_date):
-            d = datetime.strptime(from_time_str, '%H:%M')
-            while d < datetime.strptime(to_time_str, '%H:%M'):
-                freeze = Freeze.objects.filter(facility_id=fid, date=single_date, time=time(hour=d.hour, minute=d.minute)).first()
-                if freeze:
-                    freeze.lock_count = freeze.lock_count - 1
-                    if freeze.lock_count <= 0:
-                        if freeze.is_order:
-                            freeze.is_lock = False
-                            freeze.save()
-                        else:
-                            freeze.delete()
-                    else:
-                        freeze.save()
-                d += delta
+#     def delete(self, request, fid=None, lid=None):
+#         lock_info = LockInfo.objects.filter(id=lid).first()
+#         from_date = lock_info.from_date
+#         to_date = lock_info.to_date
+#         slot = lock_info.slot
+#         from_time_str, to_time_str = split_time(slot)
+#         delta = timedelta(minutes=30)
+#         for single_date in daterange(from_date, to_date):
+#             d = datetime.strptime(from_time_str, '%H:%M')
+#             while d < datetime.strptime(to_time_str, '%H:%M'):
+#                 freeze = Freeze.objects.filter(facility_id=fid, date=single_date, time=time(hour=d.hour, minute=d.minute)).first()
+#                 if freeze:
+#                     freeze.lock_count = freeze.lock_count - 1
+#                     if freeze.lock_count <= 0:
+#                         if freeze.is_order:
+#                             freeze.is_lock = False
+#                             freeze.save()
+#                         else:
+#                             freeze.delete()
+#                     else:
+#                         freeze.save()
+#                 d += delta
 
-        # Delete Lock Info
-        lock_info = LockInfo.objects.filter(id=lid).first()
-        lock_info.delete()
+#         # Delete Lock Info
+#         lock_info = LockInfo.objects.filter(id=lid).first()
+#         lock_info.delete()
 
-        return HttpResponse("", status=204)
+#         return HttpResponse("", status=204)
 
 
-@login_required(login_url="/login")
-def get_lock_info(request, fid=None):
-    if request.method == 'GET':
-        today = date.today()
-        lock_info_obj_list = LockInfo.objects.filter(
-            facility_id=fid,
-            to_date__gte=today,
-        ).order_by('to_date')
-        resp = {}
-        lock_info_list = []
-        for lock_info in lock_info_obj_list:
-            lock_info_list.append({
-                "id": lock_info.pk,
-                "from_date": lock_info.from_date,
-                "to_date": lock_info.to_date,
-                "slot": lock_info.slot,
-                "operator": lock_info.operator,
-            })
-        resp['lock_info_list'] = lock_info_list
-        resp['current_login_user'] = {
-            "username": request.user.username,
-            "is_super_admin": request.user.is_super_admin
-        }
-        return JsonResponse(resp, safe=False)
+# @login_required(login_url="/login")
+# def get_lock_info(request, fid=None):
+#     if request.method == 'GET':
+#         today = date.today()
+#         lock_info_obj_list = LockInfo.objects.filter(
+#             facility_id=fid,
+#             to_date__gte=today,
+#         ).order_by('to_date')
+#         resp = {}
+#         lock_info_list = []
+#         for lock_info in lock_info_obj_list:
+#             lock_info_list.append({
+#                 "id": lock_info.pk,
+#                 "from_date": lock_info.from_date,
+#                 "to_date": lock_info.to_date,
+#                 "slot": lock_info.slot,
+#                 "operator": lock_info.operator,
+#                 "lock_type": lock_info.lock_type
+#             })
+#         resp['lock_info_list'] = lock_info_list
+#         resp['current_login_user'] = {
+#             "username": request.user.username,
+#             "is_super_admin": request.user.is_super_admin
+#         }
+#         return JsonResponse(resp, safe=False)
 
 
 def get_cover_image_list(request, fid=None):

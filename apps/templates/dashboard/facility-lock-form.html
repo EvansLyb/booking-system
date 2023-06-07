@@ -10,9 +10,27 @@
   <div class="content">
     <div class="card">
       <div class="card-body">
-        <form role="form" method="post" action="">
+        <form id="form" role="form" method="post" action="">
           <div class="form-group">
-          {{ form.as_p }}
+            <label>Lock type</label>
+            {{ form.lock_type }}
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <div class="d-flex align-items-center">
+              <div style="width: 25%;">{{ form.from_date }}</div>
+              <div style="padding: 0 10px;">-</div>
+              <div style="width: 25%;">{{ form.to_date }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Time</label>
+            <div class="d-flex align-items-center">
+              <div style="width: 25%;">{{ form.from_time }}</div>
+              <div style="padding: 0 10px;">-</div>
+              <div style="width: 25%;">{{ form.to_time }}</div>
+            </div>
+          </div>
           <br>
           {% if form.errors %}
             {% for field in form %}
@@ -33,7 +51,7 @@
 
           <div class="justify-content-center">
             <button onclick="window.location.href = '/dashboard/facility/list'" type="button" class="btn">Back</button>
-            <button type="submit" class="btn btn-danger" formaction="?act=lock">Lock</button>
+            <button id="btn-submit" type="submit" class="btn btn-danger" formaction="?act=lock">Lock</button>
           </div>
         </form>
       </div>
@@ -51,28 +69,37 @@
       format: 'H:i',
       step: 30,
       theme: 'dark',
-      onShow: function(ct) {
-        this.setOptions({
-          maxTime: $('.totimepicker').val() ? $('.totimepicker').val() : false
-        })
-      }
     });
     $('.totimepicker').datetimepicker({
       datepicker: false,
       format: 'H:i',
       step: 30,
       theme: 'dark',
-      onShow: function(ct) {
-        this.setOptions({
-          minTime: $('.fromtimepicker').val() ? $('.fromtimepicker').val() : false
-        })
-      }
     });
-    $('.datepicker').datetimepicker({
+    $('.fromdatepicker').datetimepicker({
       timepicker: false,
       format:'Y-m-d',
       theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          maxDate: $('.todatepicker').val() ? $('.todatepicker').val() : false
+        })
+      }
     });
+    $('.todatepicker').datetimepicker({
+      timepicker: false,
+      format:'Y-m-d',
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          minDate: $('.fromdatepicker').val() ? $('.fromdatepicker').val() : false
+        })
+      }
+    });
+    // debounce
+    $('#form').submit(function() {
+      $('#btn-submit').prop('disabled', true);
+    })
   });
 </script>
 {% endblock javascripts %}

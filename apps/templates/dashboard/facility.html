@@ -102,7 +102,7 @@
     </div>
   </div>
   <!-- Modal - Lock Info -->
-  <div class="modal fade modal-black" id="lock-info-modal" tabindex="-1" role="dialog" aria-labelledby="lock-info-modal-title" aria-hidden="true">
+  <div class="modal fade modal-black bd-example-modal-lg" id="lock-info-modal" tabindex="-1" role="dialog" aria-labelledby="lock-info-modal-title" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -117,6 +117,7 @@
               <tr>
                 <th class="text-center">Date</th>
                 <th class="text-center">Time</th>
+                <th class="text-center">Type</th>
                 <th class="text-center">Operator</th>
                 <th class="text-center">Action</th>
               </tr>
@@ -187,9 +188,9 @@
             var lockInfo = lock_info_list[i]
             var formattedDate = lockInfo.from_date == lockInfo.to_date ? lockInfo.from_date : `${lockInfo.from_date} ~ ${lockInfo.to_date}`
             if (data.current_login_user.is_super_admin || data.current_login_user.username == lockInfo.operator) {
-              lockInfoModalTableBody.append(`<tr><td class="text-center">${formattedDate}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td><td class="text-center">${lockInfo.operator}</td><td class="text-center"><button class="btn btn-primary btn-link btn-lock-info" data-dismiss="modal" onclick='handleUnlock(${fid}, ${lockInfo.id})'>unlock</button></td></tr>`)
+              lockInfoModalTableBody.append(`<tr><td class="text-center">${formattedDate}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td><td class="text-center">${lockInfo.lock_type}</td><td class="text-center">${lockInfo.operator}</td><td class="text-center"><button class="btn btn-primary btn-link btn-lock-info" data-dismiss="modal" onclick='handleUnlock(${fid}, ${lockInfo.id})'>unlock</button></td></tr>`)
             } else {
-              lockInfoModalTableBody.append(`<tr><td class="text-center">${formattedDate}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td><td class="text-center">${lockInfo.operator}</td><td></td></tr>`)
+              lockInfoModalTableBody.append(`<tr><td class="text-center">${formattedDate}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td><td class="text-center">${lockInfo.lock_type}</td><td class="text-center">${lockInfo.operator}</td><td></td></tr>`)
             }
           }
           $("#lock-info-modal").modal()

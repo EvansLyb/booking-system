@@ -8,29 +8,40 @@ from django import forms
 from django.forms import Form
 from django.core.exceptions import ValidationError
 
+from apps.dashboard.models import LockType
+
 
 class LockForm(Form):
+    lock_type = forms.ChoiceField(
+        required=True,
+        choices=LockType.choices,
+        widget=forms.Select(
+            attrs={
+                "placeholder": "Lock Type",
+                "class": "form-control", 
+            }
+        ))
     from_date = forms.DateField(
         required=True,
         widget=forms.DateInput(
             attrs={
-                "placeholder": "From Date",
-                "class": "form-control datepicker"
+                "placeholder": "From",
+                "class": "form-control fromdatepicker"
             },
         ))
     to_date = forms.DateField(
         required=True,
         widget=forms.DateInput(
             attrs={
-                "placeholder": "To Date",
-                "class": "form-control datepicker"
+                "placeholder": "To",
+                "class": "form-control todatepicker"
             },
         ))
     from_time = forms.TimeField(
         required=True,
         widget=forms.TimeInput(
             attrs={
-                "placeholder": "From Time",
+                "placeholder": "From",
                 "class": "form-control fromtimepicker"
             },
             format="%H:%M"
@@ -39,7 +50,7 @@ class LockForm(Form):
         required=True,
         widget=forms.TimeInput(
             attrs={
-                "placeholder": "To Time",
+                "placeholder": "To",
                 "class": "form-control totimepicker"
             },
             format="%H:%M"
@@ -47,7 +58,12 @@ class LockForm(Form):
 
     def clean(self) -> Dict[str, Any]:
         cleaned_data = super().clean()
+        from_date = cleaned_data.get('from_date')
+        to_date = cleaned_data.get('to_date')
         from_time = cleaned_data.get('from_time')
         to_time = cleaned_data.get('to_time')
-        if from_time == to_time:
+        lock_type = cleaned_data.get('lock_type')
+        if (lock_type == LockType.REPEAT) and from_time >= to_time:
+            raise ValidationError('Invalid time')
+        if (from_date == to_date or lock_type == LockType.REPEAT) and from_time == to_time:
             raise ValidationError('Please set a different time')

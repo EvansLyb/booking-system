@@ -4,8 +4,9 @@ Copyright (c) 2019 - present Kyle
 """
 
 from django.urls import path, re_path
-from apps.dashboard import views
-from apps.dashboard.views import AccountListView, StadiumListView, StadiumView, AccountView, FacilityListView, FacilityView, PriceView, PriceListView, LockView, get_lock_info, get_cover_image_list, delete_cover_image, post_cover_image
+from apps.dashboard import views_old
+from apps.dashboard.views_old import AccountListView, StadiumListView, StadiumView, AccountView, FacilityListView, FacilityView, PriceView, PriceListView, get_cover_image_list, delete_cover_image, post_cover_image
+from .views.lock import LockView, get_lock_info
 
 urlpatterns = [
 
@@ -29,6 +30,6 @@ urlpatterns = [
     path('/delete-cover-image/<int:id>', delete_cover_image, name='delete_cover_image'),
 
     # # Matches any html file
-    re_path(r'^.*\.*', views.pages, name='dashboard_pages'),
+    re_path(r'^.*\.*', views_old.pages, name='dashboard_pages'),
 
 ]

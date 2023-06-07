@@ -56,12 +56,17 @@ class Price(models.Model):
     peek_time_to = models.TimeField(null=True)
 
 
+class LockType(models.TextChoices):
+    REPEAT = "REPEAT"
+    CONTINUOUS = "CONTINUOUS"
+
 class LockInfo(models.Model):
     facility_id = models.BigIntegerField('facility_id', blank=False)
     from_date = models.DateField('from_date', default=datetime.date.today)
     to_date = models.DateField('to_date', default=datetime.date.today)
     slot = models.CharField('slot', max_length=255, blank=False)  # just for display
     operator = models.CharField('operator', max_length=255, blank=True)
+    lock_type = models.CharField('lock_type', max_length=255, choices=LockType.choices, default=LockType.REPEAT)
 
 
 class Freeze(models.Model):
