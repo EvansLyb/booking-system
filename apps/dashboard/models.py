@@ -17,6 +17,7 @@ class Stadium(models.Model):
     longitude = models.FloatField('location - longitude')
     latitude = models.FloatField('location - latitude')
     location = models.CharField('location', max_length=1024, blank=True)
+    description = models.TextField('description', blank=True, default='')
 
 
 class Facility(models.Model):

@@ -46,6 +46,14 @@ class StadiumForm(ModelForm):
                 "class": "form-control"
             }
         ))
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                "placeholder": "Description",
+                "class": "form-control"
+            }
+        ))
 
     class Meta:
         model = Stadium
