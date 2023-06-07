@@ -12,7 +12,42 @@
     <div class="card">
       <div class="card-body">
         <form role="form" method="post" action="">
-          {{ form.as_p }}
+          <div class="form-group">
+            <label>Court type</label>
+            {{ form.court_type }}
+          </div>
+          <div class="form-group">
+            <label>Day type</label>
+            {{ form.day_type }}
+          </div>
+          <div class="form-group">
+            <label>Opening Time</label>
+            {{ form.opening_time }}
+          </div>
+          <div class="form-group">
+            <label>Closing Time</label>
+            {{ form.closing_time }}
+          </div>
+          <div class="form-group">
+            <label>Full Day Price</label>
+            {{ form.full_day_price }}
+          </div>
+          <div class="form-group">
+            <label>Normal Hourly Price</label>
+            {{ form.normal_hourly_price }}
+          </div>
+          <div class="form-group">
+            <label>Peek Hourly Price</label>
+            {{ form.peek_hourly_price }}
+          </div>
+          <div class="form-group">
+            <label>Peek Time</label>
+            <div class="d-flex align-items-center">
+              <div style="width: 25%;">{{ form.peek_time_from }}</div>
+              <div style="padding: 0 10px;">-</div>
+              <div style="width: 25%;">{{ form.peek_time_to }}</div>
+            </div>
+          </div>
           <br>
           {% if form.errors %}
             {% for field in form %}
@@ -46,18 +81,57 @@
 {% block javascripts %}
 <script>
   $(document).ready(function() {
-    $('.datetimepicker').datetimepicker({
-      datepicker: false,
-      format: 'H:i',
-      step: 30,
-      theme: 'dark',
-    });
     $('.price-input').on('input propertychange', function() {
       this.value=this.value.toString().match(/^\d+(?:\.\d{0,2})?/);
       if (this.value.indexOf('.') < 0 && this.value != '') {
         this.value = parseFloat(this.value);
       }
     })
+    // === time picker === //
+    $('.openingtimepicker').datetimepicker({
+      datepicker: false,
+      format: 'H:i',
+      step: 30,
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          maxTime: $('.closingtimepicker').val() ? $('.closingtimepicker').val() : false
+        })
+      }
+    });
+    $('.closingtimepicker').datetimepicker({
+      datepicker: false,
+      format: 'H:i',
+      step: 30,
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          minTime: $('.openingtimepicker').val() ? $('.openingtimepicker').val() : false
+        })
+      }
+    });
+    $('.peektimefrompicker').datetimepicker({
+      datepicker: false,
+      format: 'H:i',
+      step: 30,
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          maxTime: $('.peektimetopicker').val() ? $('.peektimetopicker').val() : false
+        })
+      }
+    });
+    $('.peektimetopicker').datetimepicker({
+      datepicker: false,
+      format: 'H:i',
+      step: 30,
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          minTime: $('.peektimefrompicker').val() ? $('.peektimefrompicker').val() : false
+        })
+      }
+    });
   });
 </script>
 {% endblock javascripts %}

@@ -22,9 +22,9 @@
                     <th>Court Type</th>
                     <th>Day Type</th>
                     <th>Full Day Price</th>
-                    <th>Low Time Price</th>
-                    <th>High Time Price</th>
-                    <th>Separation Timing</th>
+                    <th>Normal Hourly Price</th>
+                    <th>Peek Hourly Price</th>
+                    <th>Peek Time</th>
                     <th>Opening Time</th>
                     <th>Closing Time</th>
                     <th class="text-center">Actions</th>
@@ -36,9 +36,9 @@
                     <td>{{ price.court_type }}</td>
                     <td>{{ price.day_type }}</td>
                     <td>{{ price.full_day_price }}</td>
-                    <td>{{ price.low_time_price }}</td>
-                    <td>{{ price.high_time_price }}</td>
-                    <td>{{ price.separation_timing }}</td>
+                    <td>{{ price.normal_hourly_price }}</td>
+                    <td>{{ price.peek_hourly_price }}</td>
+                    <td>{{ price.peek_time_from|default_if_none:"" }} - {{ price.peek_time_to|default_if_none:"" }}</td>
                     <td>{{ price.opening_time }}</td>
                     <td>{{ price.closing_time }}</td>
                     <td class="td-actions text-center">

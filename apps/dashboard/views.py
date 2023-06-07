@@ -282,9 +282,13 @@ class PriceView(LoginRequiredMixin, View):
             opening_time = form.cleaned_data['opening_time']
             closing_time = form.cleaned_data['closing_time']
             full_day_price = form.cleaned_data['full_day_price']
-            low_time_price = form.cleaned_data['low_time_price']
-            high_time_price = form.cleaned_data['high_time_price']
-            separation_timing = form.cleaned_data['separation_timing']
+            normal_hourly_price = form.cleaned_data['normal_hourly_price']
+            peek_hourly_price = form.cleaned_data['peek_hourly_price']
+            peek_time_from = form.cleaned_data['peek_time_from']
+            peek_time_to = form.cleaned_data['peek_time_to']
+            # reset peek_hourly_price
+            if not peek_time_from and not peek_time_to and peek_hourly_price == None:
+                peek_hourly_price = normal_hourly_price
             if price:
                 # if is another type
                 if (price.court_type != court_type or price.day_type != day_type):
@@ -301,9 +305,10 @@ class PriceView(LoginRequiredMixin, View):
                 price.opening_time = opening_time
                 price.closing_time = closing_time
                 price.full_day_price = clean_price(full_day_price)
-                price.low_time_price = clean_price(low_time_price)
-                price.high_time_price = clean_price(high_time_price)
-                price.separation_timing = separation_timing
+                price.normal_hourly_price = clean_price(normal_hourly_price)
+                price.peek_hourly_price = clean_price(peek_hourly_price)
+                price.peek_time_from = peek_time_from
+                price.peek_time_to = peek_time_to
             else:
                 is_already_set = Price.objects.filter(
                     facility_id=fid,
@@ -320,9 +325,10 @@ class PriceView(LoginRequiredMixin, View):
                     opening_time=opening_time,
                     closing_time=closing_time,
                     full_day_price=clean_price(full_day_price),
-                    low_time_price=clean_price(low_time_price),
-                    high_time_price=clean_price(high_time_price),
-                    separation_timing=separation_timing
+                    normal_hourly_price=clean_price(normal_hourly_price),
+                    peek_hourly_price=clean_price(peek_hourly_price),
+                    peek_time_from=peek_time_from,
+                    peek_time_to=peek_time_to
                 )
             price.save()
             return redirect("/dashboard/facility/{}/price/list".format(fid))
@@ -465,12 +471,26 @@ class LockView(LoginRequiredMixin, View):
 def get_lock_info(request, fid=None):
     if request.method == 'GET':
         today = date.today()
-        lock_info_list = LockInfo.objects.filter(
+        lock_info_obj_list = LockInfo.objects.filter(
             facility_id=fid,
             to_date__gte=today,
         ).order_by('to_date')
-        serialized_data = serialize("json", lock_info_list)
-        return JsonResponse(serialized_data, safe=False)
+        resp = {}
+        lock_info_list = []
+        for lock_info in lock_info_obj_list:
+            lock_info_list.append({
+                "id": lock_info.pk,
+                "from_date": lock_info.from_date,
+                "to_date": lock_info.to_date,
+                "slot": lock_info.slot,
+                "operator": lock_info.operator,
+            })
+        resp['lock_info_list'] = lock_info_list
+        resp['current_login_user'] = {
+            "username": request.user.username,
+            "is_super_admin": request.user.is_super_admin
+        }
+        return JsonResponse(resp, safe=False)
 
 
 def get_cover_image_list(request, fid=None):

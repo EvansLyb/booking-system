@@ -180,14 +180,17 @@
         method: "GET",
       }).then(function(res) {
         res.json().then(function(data) {
-          var json_data = JSON.parse(data)
+          var lock_info_list = data.lock_info_list
           var lockInfoModalTableBody = $("#lock-info-modal-table-body")
           lockInfoModalTableBody.empty()
-          for (var i = 0; i < json_data.length; i++) {
-            var lockInfo = json_data[i].fields
-            var lockId = json_data[i].pk
+          for (var i = 0; i < lock_info_list.length; i++) {
+            var lockInfo = lock_info_list[i]
             var formattedDate = lockInfo.from_date == lockInfo.to_date ? lockInfo.from_date : `${lockInfo.from_date} ~ ${lockInfo.to_date}`
-            lockInfoModalTableBody.append(`<tr><td class="text-center">${formattedDate}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td><td class="text-center">${lockInfo.operator}</td><td class="text-center"><button class="btn btn-primary btn-link btn-lock-info" data-dismiss="modal" onclick='handleUnlock(${fid}, ${lockId})'>unlock</button></td></tr>`)
+            if (data.current_login_user.is_super_admin || data.current_login_user.username == lockInfo.operator) {
+              lockInfoModalTableBody.append(`<tr><td class="text-center">${formattedDate}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td><td class="text-center">${lockInfo.operator}</td><td class="text-center"><button class="btn btn-primary btn-link btn-lock-info" data-dismiss="modal" onclick='handleUnlock(${fid}, ${lockInfo.id})'>unlock</button></td></tr>`)
+            } else {
+              lockInfoModalTableBody.append(`<tr><td class="text-center">${formattedDate}</td><td class="text-center" style="white-space: pre-line;">${lockInfo.slot.replaceAll(', ', '\n')}</td><td class="text-center">${lockInfo.operator}</td><td></td></tr>`)
+            }
           }
           $("#lock-info-modal").modal()
         })
