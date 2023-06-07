@@ -11298,8 +11298,8 @@ table.tablesorter thead tr .headerSortDown {
 
 .sidebar,
 .off-canvas-sidebar {
-  background: #9dbf30;
-  background: linear-gradient(0deg, #9dbf30 0%, #c8e849 100%);
+  background: #a7cb1a;
+  background: linear-gradient(0deg, #6b8221 0%, #a7cb1a 100%);
   height: calc(100vh - 90px);
   width: 230px;
   position: fixed;
@@ -13340,4 +13340,14 @@ option{
 .errorlist {
   display: none;
 }
+/* sidebar */
+.sidebar .nav li i,
+.sidebar .nav li p {
+  font-weight: 600 !important;
+}
+/* pagination */
+.page-item.active .page-link {
+  font-weight: 600;
+}
+
 /*# sourceMappingURL=black-dashboard.css.map */
