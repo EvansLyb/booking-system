@@ -16,6 +16,7 @@ def get_facility_list(request):
         for facility in facility_list:
             cover_image_list = FacilityCoverImage.objects.filter(facility=facility).order_by('id')
             content = {
+                "id": facility.pk,
                 "name": facility.name,
                 "cover_image_list": [cover_image.image.url for cover_image in cover_image_list],
                 "description": facility.description
