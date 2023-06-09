@@ -18,7 +18,7 @@ def get_facility_list(request):
             content = {
                 "id": facility.pk,
                 "name": facility.name,
-                "cover_image_list": [cover_image.image.url for cover_image in cover_image_list],
+                "cover_image_list": [cover_image.file_id for cover_image in cover_image_list],
                 "description": facility.description
             }
             resp.append(content)
