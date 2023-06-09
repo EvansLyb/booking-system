@@ -66,12 +66,20 @@ def bind_phone_number(request):
         }
         try:
             resp = requests.post(request_url, json=data, headers=headers)
+            print('---')
+            print(resp)
             resp = resp.json()
+            print('===')
+            print(resp)
             phone_number = resp.get('phone_info', {}).get('phoneNumber')
+            print('+++')
+            print(phone_number)
+            print(open_id)
             User.objects.create(
                 open_id=open_id,
                 phone_number=phone_number
             )
+            print('well done')
         except Exception as e:
             print(e)
             raise e
