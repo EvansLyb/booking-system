@@ -136,7 +136,7 @@
 
           <div class="justify-content-center">
             <button onclick="window.location.href = '/dashboard/facility/list'" type="button" class="btn">Back</button>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button id="btn-submit" type="submit" class="btn btn-primary">Submit</button>
           </div>
         </form>
       </div>
@@ -235,6 +235,12 @@
       }
       $('.file-input')[0].files = container.files
     }
+
+    // debounce
+    $('#form').submit(function() {
+      $('#btn-submit').prop('disabled', true);
+      $('#btn-submit').html('Uploading images...')
+    })
   });
 </script>
 {% endblock javascripts %}
