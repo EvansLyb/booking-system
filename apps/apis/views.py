@@ -68,7 +68,7 @@ def bind_phone_number(request):
             resp = requests.post(request_url, json=data, headers=headers)
             resp = resp.json()
             phone_number = resp.get('phone_info', {}).get('phoneNumber')
-            User.objects.create(
+            User.objects.get_or_create(
                 open_id=open_id,
                 phone_number=phone_number
             )
