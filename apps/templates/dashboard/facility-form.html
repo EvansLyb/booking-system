@@ -161,7 +161,7 @@
         }).then(function(res) {
           res.json().then(async function(json_data) {
             for (let i = 0; i < json_data.length; i++) {
-              let imageUrl = json_data[i].image
+              let imageUrl = json_data[i].image_url
               let id = json_data[i].id
               let file = await getFileFromUrl(imageUrl)
               appendFiles(file)

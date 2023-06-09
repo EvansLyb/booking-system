@@ -5,8 +5,9 @@ Copyright (c) 2019 - present Kyle
 
 from django.urls import path, re_path
 from apps.dashboard import views_old
-from apps.dashboard.views_old import AccountListView, StadiumListView, StadiumView, AccountView, FacilityListView, FacilityView, PriceView, PriceListView, get_cover_image_list, delete_cover_image, post_cover_image
+from apps.dashboard.views_old import AccountListView, StadiumListView, StadiumView, AccountView, PriceView, PriceListView
 from .views.lock import LockView, get_lock_info
+from .views.facility import FacilityListView, FacilityView, get_cover_image_list
 
 urlpatterns = [
 
@@ -26,8 +27,6 @@ urlpatterns = [
     path('/facility/<int:fid>/lock', LockView.as_view()),
     path('/facility/<int:fid>/unlock/<int:lid>', LockView.as_view()),
     path('/facility/<int:fid>/lock/info', get_lock_info, name='dashboard_lock_info'),
-    path('/facility/<int:fid>/post-cover-image', post_cover_image, name='post_cover_image'),
-    path('/delete-cover-image/<int:id>', delete_cover_image, name='delete_cover_image'),
 
     # # Matches any html file
     re_path(r'^.*\.*', views_old.pages, name='dashboard_pages'),
