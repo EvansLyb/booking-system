@@ -10,8 +10,6 @@ import datetime
 from decimal import Decimal
 
 
-# Create your models here.
-
 class Stadium(models.Model):
     name = models.CharField('name', max_length=256, blank=False)
     longitude = models.FloatField('location - longitude')
