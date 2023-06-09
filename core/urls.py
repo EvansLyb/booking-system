@@ -8,9 +8,9 @@ from django.urls import path, re_path, include  # add this
 from django.conf.urls.static import static
 from django.views.static import serve
 from django.contrib.auth.decorators import login_required
-from ckeditor_uploader.views import upload
 
 from core import settings
+from utils.uploader import upload
 
 urlpatterns = [
     # path('admin/', admin.site.urls),          # Django admin route
