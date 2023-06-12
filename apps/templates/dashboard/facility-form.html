@@ -171,7 +171,15 @@
       }
     }
     async function getFileFromUrl(url, name, defaultType = 'image/jpeg'){
-      const response = await fetch(url);
+      const response = await fetch(`/dashboard/facility/download_cover_image_by_url`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url,
+        }),
+      })
       const data = await response.blob();
       return new File([data], name, {
         type: data.type || defaultType,

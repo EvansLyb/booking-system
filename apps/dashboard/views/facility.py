@@ -7,12 +7,14 @@ from django.views import View
 from django.views.generic.list import ListView
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse
 from django.template import loader
 from django.core.paginator import Paginator
 
 import math
 import uuid
+import requests
+import json
 
 from apps.dashboard.models import Facility, FacilityCoverImage
 from apps.dashboard.forms.facility import FacilityForm
@@ -121,6 +123,13 @@ def get_cover_image_list(request, fid=None):
             })
         return JsonResponse(result, safe=False)
 
+
+def download_cover_image_by_url(request):
+    if request.method == 'POST':
+        json_data = json.loads(request.body)
+        url = json_data.get('url', '')
+        resp = requests.get(url=url)
+        return FileResponse(resp, as_attachment=False)
 
 # @login_required(login_url="/login")
 # def post_cover_image(request, fid=None):
