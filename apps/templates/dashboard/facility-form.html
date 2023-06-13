@@ -52,6 +52,11 @@
     border-radius: 3px;
     transition: .2s;
   }
+  .file-drop-area.loading{
+    background: url({{ ASSETS_ROOT }}/img/icon-loading.gif) no-repeat center;
+    background-size: 6%;
+    background-color: #000;
+  }
 
   .choose-file-button{
     flex-shrink: 0;
@@ -164,14 +169,14 @@
               let imageUrl = json_data[i].image_url
               let id = json_data[i].id
               let file = await getFileFromUrl(imageUrl)
-              appendFiles(file)
+              appendFile(file, json_data[i].file_id)
             }
           })
         })
       }
     }
     async function getFileFromUrl(url, name, defaultType = 'image/jpeg'){
-      const response = await fetch(`/dashboard/facility/download_cover_image_by_url`, {
+      const response = await fetch(`/dashboard/facility/download-cover-image-by-url`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -187,50 +192,114 @@
     }
 
     $('.file-input').change(async function() {
-			var filesCount = $(this)[0].files.length;
+			const filesCount = $(this)[0].files.length;
 			if (typeof (FileReader) != "undefined") {
-        appendFiles($(this)[0].files);
+        /** loading **/
+        $('.file-input').attr('disabled', true)
+        $('.file-drop-area').addClass('loading')
+        /** loading **/
+        for (let i = 0; i < filesCount; i++) {
+          let file = $(this)[0].files[i]
+          const fileId = await uploadFile(file)
+          appendFile(file, fileId)
+        }
+        /** loading **/
+        $('.file-input').attr('disabled', false)
+        $('.file-drop-area').removeClass('loading')
+        /** loading **/
       }
     })
 
-    function appendFiles(files) {
-      var dvPreview = $("#divImageMediaPreview");
-      $(files).each(function () {
-        var file = $(this);     
-        var reader = new FileReader();
-        var randomId = +Date.now();
-        reader.onload = function (e) {
-          var imgWrapper = $("<div />")
-          var img = $("<img />");
-          var deleteDot = $("<span />")
-          imgWrapper.attr("style", "padding: 10px;position: relative;")
-          img.attr("style", "width: 150px;");
-          img.attr("src", e.target.result);
-          deleteDot.attr("class", "delete-dot")
-          imgWrapper.append(img)
-          imgWrapper.append(deleteDot)
-          dvPreview.append(imgWrapper);
+    async function uploadFile(file) {
+      const fileName = file.name
+      const path = `booking-system/${+Date.now()}-${fileName}`
+      const resp = await fetch(`/dashboard/facility/get-upload-file-info`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          path,
+        }),
+      })
+      const data = await resp.json()
+      let formData = new FormData()
+      formData.append('key', path);
+      formData.append('Signature', data.authorization);
+      formData.append('x-cos-security-token', data.token);
+      formData.append('x-cos-meta-fileid', data.cos_file_id);
+      formData.append('file', $(file)[0]);
+      await fetch(data.url, {
+        method: "POST",
+        body: formData
+      })
+      // update image info to server
+      updateFileInfoToServer(path, data.file_id)
+      return data.file_id
+    }
 
-          // bind delete event
-          deleteDot.on("click", function() {
-            removeCurFileByRandomId(randomId)
-          })
-        }
-        Object.assign(file[0], {
-          randomId: randomId
+    async function updateFileInfoToServer(filePath, fileId) {
+      var facilityId = document.location.pathname.split('/').pop()
+      if (Number.isInteger(parseInt(facilityId))) {
+        fetch(`/dashboard/facility/${facilityId}/cover-image`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file_path: filePath,
+            file_id: fileId
+          }),
         })
-        reader.readAsDataURL(file[0]);
-        curFiles.push(file[0])
-      });
+      }
+    }
+
+    function appendFile(file, fileId) {
+      var dvPreview = $("#divImageMediaPreview");
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var imgWrapper = $("<div />")
+        var img = $("<img />");
+        var deleteDot = $("<span />")
+        imgWrapper.attr("style", "padding: 10px;position: relative;")
+        img.attr("style", "width: 150px;");
+        img.attr("src", e.target.result);
+        deleteDot.attr("class", "delete-dot")
+        imgWrapper.append(img)
+        imgWrapper.append(deleteDot)
+        dvPreview.append(imgWrapper);
+
+        // bind delete event
+        deleteDot.on("click", function() {
+          removeCurFileByFileId(fileId)
+        })
+      }
+      $(file).each(function() {
+        Object.assign($(this)[0], {
+          fileId: fileId
+        })
+        reader.readAsDataURL($(this)[0]);
+        curFiles.push($(this)[0])
+      })
+
       updateFileInputByCurFile(curFiles)
     }
 
-    function removeCurFileByRandomId(randomId) {
-      var dvPreview = $("#divImageMediaPreview");
+    function removeCurFileByFileId(fileId) {
+      let dvPreview = $("#divImageMediaPreview");
       for (let i = 0; i < curFiles.length; i++) {
-        if (randomId == curFiles[i].randomId) {
+        if (fileId == curFiles[i].fileId) {
           dvPreview.children('div').eq(i).remove()
           curFiles.splice(i, 1)
+          fetch(`/dashboard/facility/delete-cover-image-by-file-id`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              file_id: fileId,
+            }),
+          })
         }
       }
       updateFileInputByCurFile(curFiles)

@@ -5,6 +5,7 @@ Copyright (c) 2019 - present Kyle
 
 from django.views import View
 from django.views.generic.list import ListView
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse
@@ -78,26 +79,6 @@ class FacilityView(LoginRequiredMixin, View):
 
         if form.is_valid():
             facility = form.save()
-            # delete old cover images
-            FacilityCoverImage.objects.filter(facility=facility).delete()
-            # reset cover images
-            cover_image_list = request.FILES.getlist('cover_image_list')
-            for image in cover_image_list:
-                file_path = "booking-system/{}-{}".format(uuid.uuid4().hex, image.name)
-                resp = get_upload_file_info(file_path)
-                upload_file(
-                    resp.get('url'),
-                    file_path,
-                    resp.get('authorization'),
-                    resp.get('token'),
-                    resp.get('cos_file_id'),
-                    image
-                )
-                FacilityCoverImage.objects.create(
-                    facility=facility,
-                    file_path=file_path,
-                    file_id=resp.get("file_id", "")
-                )
             return redirect("/dashboard/facility/list")
 
         return render(request, "dashboard/facility-form.html", {"form": form})
@@ -111,6 +92,29 @@ class FacilityView(LoginRequiredMixin, View):
         return HttpResponse("", status=204)
 
 
+class FacilityCoverImageView(LoginRequiredMixin, View):
+    login_url = '/login'
+    redirect_field_name = 'redirect_to'
+
+    def post(self, request, fid=None, id=None):
+        if not id:
+            json_data = json.loads(request.body)
+            file_path = json_data.get('file_path', '')
+            file_id = json_data.get('file_id', '')
+            facility = Facility.objects.filter(id=fid).first()
+            if facility:
+                FacilityCoverImage.objects.create(facility=facility, file_path=file_path, file_id=file_id)
+            return JsonResponse({}, safe=False, status=201)
+
+    def delete(self, request, id):
+        try:
+            cover_image = FacilityCoverImage.objects.get(id=id)
+            cover_image.delete()
+        except:
+            pass
+        return HttpResponse("", status=204)
+
+
 def get_cover_image_list(request, fid=None):
     if request.method == 'GET':
         cover_image_list = FacilityCoverImage.objects.filter(facility__pk=fid)
@@ -119,9 +123,18 @@ def get_cover_image_list(request, fid=None):
             image_url = get_image_url_by_fiel_path(cover_image.file_path)
             result.append({
                 "id": cover_image.id,
-                "image_url": image_url
+                "image_url": image_url,
+                "file_id": cover_image.file_id
             })
         return JsonResponse(result, safe=False)
+
+
+def get_upload_image_info(request):
+    if request.method == 'POST':
+        json_data = json.loads(request.body)
+        path = json_data.get('path', '')
+        resp = get_upload_file_info(path)
+        return JsonResponse(resp, safe=False)
 
 
 def download_cover_image_by_url(request):
@@ -141,12 +154,14 @@ def download_cover_image_by_url(request):
 #         return HttpResponse("", status=201)
 
 
-# @login_required(login_url="/login")
-# def delete_cover_image(request, id=None):
-#     if (request.method == 'DELETE'):
-#         try:
-#             cover_image = FacilityCoverImage.objects.get(id=id)
-#             cover_image.delete()
-#         except:
-#             pass
-#         return HttpResponse("", status=204)
+@login_required(login_url="/login")
+def delete_cover_image_by_file_id(request):
+    if (request.method == 'DELETE'):
+        try:
+            json_data = json.loads(request.body)
+            file_id = json_data.get('file_id')
+            cover_image = FacilityCoverImage.objects.get(file_id=file_id)
+            cover_image.delete()
+        except:
+            pass
+        return HttpResponse("", status=204)
