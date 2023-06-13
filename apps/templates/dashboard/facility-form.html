@@ -306,6 +306,7 @@
     }
 
     function updateFileInputByCurFile() {
+      return  // fix 413 error
       var container = new DataTransfer();
       for (let i = 0; i < curFiles.length; i++) {
         container.items.add(curFiles[i]);
