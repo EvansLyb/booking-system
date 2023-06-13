@@ -54,7 +54,7 @@ class PriceForm(ModelForm):
             format="%H:%M"
         ))
     full_day_price = forms.FloatField(
-        required=True,
+        required=False,
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Full Day Price",
