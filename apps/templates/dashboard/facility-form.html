@@ -306,10 +306,10 @@
     }
 
     function updateFileInputByCurFile() {
-      return  // fix 413 error
       var container = new DataTransfer();
       for (let i = 0; i < curFiles.length; i++) {
-        container.items.add(curFiles[i]);
+        // fix 413 error
+        // container.items.add(curFiles[i]);
       }
       $('.file-input')[0].files = container.files
     }
