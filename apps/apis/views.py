@@ -9,7 +9,7 @@ from django.core.serializers import serialize
 import json
 import requests
 
-from apps.dashboard.models import Facility, Stadium, FacilityCoverImage
+from apps.dashboard.models import Facility, Stadium, FacilityCoverImage, Price
 from apps.apis.models import User
 
 
@@ -92,8 +92,33 @@ def check_phone_number(request):
                 "phone_numer": "",
                 "is_bound": False
             }, safe=False, status=200)
-        
+
         return JsonResponse({
             "phone_numer": user.phone_number,
             "is_bound": True
         }, safe=False, status=200)
+
+
+def get_price_info(request, fid=None):
+    if request.method == 'GET':
+        resp = {}
+        if not fid:
+            resp['price_list'] = []
+            return JsonResponse(resp, safe=False)
+
+        price_list = []
+        price_obj_list = Price.objects.filter(facility_id=fid)
+        for price_obj in price_obj_list:
+            price_list.append({
+                "court_type": price_obj.court_type,
+                "day_type": price_obj.day_type,
+                "opening_time": price_obj.opening_time,
+                "closing_time": price_obj.closing_time,
+                "full_day_price": price_obj.full_day_price,
+                "normal_hourly_price": price_obj.normal_hourly_price,
+                "peek_hourly_price": price_obj.peek_hourly_price,
+                "peek_time_from": price_obj.peek_time_from,
+                "peek_time_to": price_obj.peek_time_to
+            })
+        resp['price_list'] = price_list
+        return JsonResponse(resp, safe=False)
