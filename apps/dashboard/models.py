@@ -47,7 +47,7 @@ class Price(models.Model):
     day_type = models.CharField(max_length=255, choices=DayType.choices, default=DayType.WEEKDAY)
     opening_time = models.TimeField()
     closing_time = models.TimeField()
-    full_day_price = models.FloatField(null=True)
+    full_day_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0), null=True)
     normal_hourly_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0))
     peek_hourly_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0), null=True)
     peek_time_from = models.TimeField(null=True)
