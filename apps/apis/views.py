@@ -9,7 +9,7 @@ from django.core.serializers import serialize
 import json
 import requests
 
-from apps.dashboard.models import Facility, Stadium, FacilityCoverImage, Price
+from apps.dashboard.models import Facility, Stadium, FacilityCoverImage, Price, Freeze
 from apps.apis.models import User
 
 
@@ -121,4 +121,26 @@ def get_price_info(request, fid=None):
                 "peek_time_to": price_obj.peek_time_to
             })
         resp['price_list'] = price_list
+        return JsonResponse(resp, safe=False)
+
+
+def get_freeze(request):
+    if request.method == 'GET':
+        resp = []
+        fid = request.GET.get('fid')
+        date = request.GET.get('date')
+        if not fid or not date:
+            return JsonResponse(resp, safe=False)
+        freeze_list = Freeze.objects.filter(
+            facility_id=int(fid),
+            date=date,
+            lock_count__gt=0
+        )
+        for freeze in freeze_list:
+            resp.append({
+                "facility_id": int(fid),
+                "date": date,
+                "court_type": freeze.court_type,
+                "time": freeze.time
+            })
         return JsonResponse(resp, safe=False)

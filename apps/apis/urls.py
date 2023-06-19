@@ -10,7 +10,8 @@ from .views import (
     get_stadium_list,
     check_phone_number,
     bind_phone_number,
-    get_price_info
+    get_price_info,
+    get_freeze
 )
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
     path('/phone-number/check', check_phone_number, name='check_phone_number'),
     path('/phone-number/bind', bind_phone_number, name='bind_phone_number'),
     path('/get-price-info/<int:fid>', get_price_info),
+    path('/get-freeze', get_freeze),
 ]
