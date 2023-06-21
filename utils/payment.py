@@ -12,7 +12,6 @@ def unified_order(open_id, out_trade_no, total_price):
         "body": "payment",
         "openid": open_id,
         "out_trade_no": out_trade_no,
-        "spbill_create_ip": "",
         "env_id": settings.CLOUD_ENV,
         "sub_mch_id": settings.MCH_ID,
         "total_fee": total_price * 100,
