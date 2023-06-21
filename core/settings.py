@@ -112,6 +112,17 @@ if os.environ.get('DB_ENGINE') and os.environ.get('DB_ENGINE') == "mysql":
         }
     }
 else:
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.mysql',
+    #         'NAME': "booking",
+    #         'USER': "booking",
+    #         'HOST': "sh-cynosdbmysql-grp-6u62u5z2.sql.tencentcdb.com:25670".split(':')[0],
+    #         'PORT': "sh-cynosdbmysql-grp-6u62u5z2.sql.tencentcdb.com:25670".split(':')[1],
+    #         'PASSWORD': "book123@",
+    #         'OPTIONS': {'charset': 'utf8mb4'},
+    #     }
+    # }
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

@@ -152,7 +152,7 @@ def get_freeze(request):
 def create_order(request):
     def _freeze(facility_id, date, time_list, court_type):
         for time_str in time_list:
-            time_obj = datetime.strptime(time_str, '%H:%M')
+            time_obj = datetime.datetime.strptime(time_str, '%H:%M')
             freeze = Freeze.objects.filter(facility_id=facility_id, date=date, time=datetime.time(hour=time_obj.hour, minute=time_obj.minute)).first()
             if freeze:
                 if freeze.weights >= 1:
@@ -197,7 +197,7 @@ def create_order(request):
                 facility_id=facility_id,
                 user_id=user.id,
                 status=OrderStatus.PENDING_CONFIRMATION,
-                date=datetime.strptime(date, '%Y-%m-%d'),
+                date=datetime.datetime.strptime(date, '%Y-%m-%d'),
                 court_type=court_type,
                 price=total_price,
                 time_list=time_list,
@@ -219,7 +219,7 @@ def create_order(request):
                 facility_id=facility_id,
                 user_id=user.id,
                 status=OrderStatus.PENDING_PAYMENT,
-                date=datetime.strptime(date, '%Y-%m-%d'),
+                date=datetime.datetime.strptime(date, '%Y-%m-%d'),
                 court_type=court_type,
                 price=total_price,
                 time_list=time_list,
