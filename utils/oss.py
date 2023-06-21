@@ -21,11 +21,14 @@ def get_upload_file_info(path: str):
 
       errcode = resp.get('errcode', None)
       if errcode != 0:
+          print("Failed: get_upload_file_info")
+          print(resp.get("errmsg", ""))
           raise Exception(resp.get("errmsg", ""))
       return resp
     except Exception as e:
-       print(e)
-       raise e
+        print("Failed: get_upload_file_info")
+        print(e)
+        raise e
 
 
 """
@@ -43,6 +46,7 @@ def upload_file(url, request_path, authorization, token, file_id, file):
         resp = requests.post(url=url, files=form)
         return resp
     except Exception as e:
+        print("Failed: upload_file")
         print(e)
         raise e
 
@@ -67,6 +71,8 @@ def get_download_url_by_file_id(file_id):
 
       errcode = resp.get('errcode', None)
       if errcode != 0:
+          print("Failed: get_download_url_by_file_id")
+          print(resp.get("errmsg", ""))
           raise Exception(resp.get("errmsg", ""))
       return resp.get("file_list", [])[0].get("download_url", "")
     except Exception as e:

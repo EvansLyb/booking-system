@@ -8,9 +8,12 @@ from django.core.serializers import serialize
 
 import json
 import requests
+import datetime
 
-from apps.dashboard.models import Facility, Stadium, FacilityCoverImage, Price, Freeze
+from apps.dashboard.models import Facility, Stadium, FacilityCoverImage, Price, Freeze, Order, Bill, OrderStatus, BillType
 from apps.apis.models import User
+from utils.payment import unified_order
+from utils.util import get_freeze_weights_by_court_type
 
 
 def get_facility_list(request):
@@ -140,7 +143,127 @@ def get_freeze(request):
             resp.append({
                 "facility_id": int(fid),
                 "date": date,
-                "court_type": freeze.court_type,
+                "weights": freeze.weights,
                 "time": freeze.time
             })
         return JsonResponse(resp, safe=False)
+
+
+def create_order(request):
+    def _freeze(facility_id, date, time_list, court_type):
+        for time_str in time_list:
+            time_obj = datetime.strptime(time_str, '%H:%M')
+            freeze = Freeze.objects.filter(facility_id=facility_id, date=date, time=datetime.time(hour=time_obj.hour, minute=time_obj.minute)).first()
+            if freeze:
+                if freeze.weights >= 1:
+                    raise Exception('Already sold out. facility_id={}, date={}, time={}, court_type={}'.format(facility_id, date, time_str, court_type))
+                if freeze.is_lock and freeze.lock_count > 0:
+                    raise Exception('Locked')
+                freeze.is_order = True
+                freeze.weights = freeze.weights + get_freeze_weights_by_court_type(court_type)
+                freeze.save()
+            else:
+                freeze = Freeze(
+                    facility_id=facility_id,
+                    date=date,
+                    time=datetime.time(hour=time_obj.hour, minute=time_obj.minute),
+                    is_order=True,
+                    weights=get_freeze_weights_by_court_type(court_type)
+                )
+                freeze.save()
+
+    if request.method == 'POST':
+        open_id = request.headers.get('X-Wx-Openid', '')
+        if not open_id:
+            return JsonResponse({}, safe=False, status=400)
+
+        user = User.objects.filter(open_id=open_id).first()
+        if not user:
+            print('User does not exist, open_id: {}'.format(open_id))
+            return JsonResponse({}, safe=False, status=400)
+
+        json_data = json.loads(request.body)
+        total_price = json_data.get('total_price', None)
+        facility_id = json_data.get('facility_id', None)
+        date = json_data.get('date', None)
+        court_type = json_data.get('court_type', None)
+        time_list = json_data.get('time_list', [])
+        remark = json_data.get('remark', '')
+        if not total_price or not facility_id or not date or not court_type or len(time_list) == 0:
+            return JsonResponse({}, safe=False, status=400)
+
+        if total_price == 0:
+            Order.objects.create(
+                facility_id=facility_id,
+                user_id=user.id,
+                status=OrderStatus.PENDING_CONFIRMATION,
+                date=datetime.strptime(date, '%Y-%m-%d'),
+                court_type=court_type,
+                price=total_price,
+                time_list=time_list,
+                remark=remark
+            )
+            try:
+                _freeze(facility_id, date, time_list, court_type)
+            except Exception as e:
+                print("Failed: create_order")
+                print(e)
+                return JsonResponse({"errMsg": e}, safe=False, status=400)
+            return JsonResponse({}, safe=False, status=201)
+        else:
+            now = datetime.datetime.now()
+            trade_no = str(now).replace('.', '').replace('-', '').replace(':', '').replace(' ', '')
+            resp = unified_order(open_id=open_id, out_trade_no=trade_no, total_price=total_price)
+            resp_data = resp.get('respdata', {})
+            order = Order.objects.create(
+                facility_id=facility_id,
+                user_id=user.id,
+                status=OrderStatus.PENDING_PAYMENT,
+                date=datetime.strptime(date, '%Y-%m-%d'),
+                court_type=court_type,
+                price=total_price,
+                time_list=time_list,
+                remark=remark
+            )
+            Bill.objects.create(
+                order_id=order.id,
+                bill_type=BillType.PAYMENT,
+                amount=total_price,
+                trade_no=trade_no,
+                nonce_str=resp_data.get('nonce_str', '')
+            )
+
+            try:
+                _freeze(facility_id, date, time_list, court_type)
+            except Exception as e:
+                print("Failed: create_order")
+                print(e)
+                return JsonResponse({"errMsg": e}, safe=False, status=400)
+
+            payment_data = resp_data.get('payment', {})
+            return JsonResponse(payment_data, safe=False, status=201)
+
+
+def payment_callback(request):
+    json_data = json.loads(request.body)
+    print("payment_callback:")
+    print(json_data)
+    transaction_id = json_data.get("transactionId", None)
+    trade_no = json_data.get("outTradeNo", None)
+    if transaction_id == None or trade_no == None:
+        return JsonResponse({
+            "errcode": 1,
+            "errmsg": ""
+        }, safe=False, status=400)
+
+    bill = Bill.objects.filter(trade_no=trade_no).first()
+    bill.transaction_id = transaction_id
+    bill.save()
+    order = Order.objects.filter(id=bill.order_id).first()
+    order.status = OrderStatus.PENDING_CONFIRMATION
+    order.save()
+
+    return JsonResponse({
+        "errcode": 0,
+        "errmsg": ""
+    }, safe=False, status=200)

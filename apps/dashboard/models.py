@@ -70,7 +70,13 @@ class LockInfo(models.Model):
 class Freeze(models.Model):
     facility_id = models.BigIntegerField('facility_id', blank=False)
     date = models.DateField('date')
-    court_type = models.CharField(max_length=255, choices=CourtType.choices, default=None, null=True, blank=True)
+    """
+    weights = 1 means this sku already sold out
+    - CourtType.FULL = 1
+    - CourtType.HALF = 0.5
+    - CourtType.QUARTER = 0.25
+    """
+    weights = models.DecimalField(max_digits=3, decimal_places=2, default=Decimal(0), null=False)
     is_lock = models.BooleanField(default=False)
     """
     - Lock once, increment the count by 1
@@ -81,5 +87,35 @@ class Freeze(models.Model):
     time = models.TimeField()  # start time, slot=30min
 
 
+class OrderStatus(models.TextChoices):
+    PENDING_PAYMENT = "Pending Payment"
+    PENDING_CONFIRMATION = "Pending Confirmation"
+    ACCEPTED = "Accepted"
+    REJECTED = "Rejected"
+
+
 class Order(models.Model):
-    pass
+    facility_id = models.BigIntegerField('facility_id', blank=False)
+    user_id = models.BigIntegerField('user_id', blank=False, null=False)
+    status = models.CharField(max_length=255, choices=OrderStatus.choices, default=OrderStatus.PENDING_PAYMENT)
+    date = models.DateField('date')
+    court_type = models.CharField(max_length=255, choices=CourtType.choices, null=False)
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0), null=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now_add=True, null=True)
+    remark = models.CharField(max_length=2048, null=True, blank=True)
+    time_list = models.CharField(max_length=2048, null=False)  # ["08:30", "12:00", "19:00"]
+
+
+class BillType(models.TextChoices):
+    PAYMENT = "Payment"
+    REFUND = "Refund"
+
+class Bill(models.Model):
+    order_id = models.BigIntegerField('order_id', blank=False, null=False)
+    trade_no = models.CharField(max_length=1024, null=False)
+    bill_type = models.CharField(max_length=64, choices=BillType.choices, default=BillType.PAYMENT)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0), null=False)
+    transaction_id = models.CharField(max_length=1024, null=True)
+    nonce_str = models.CharField(max_length=1024, null=False)

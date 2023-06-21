@@ -11,7 +11,9 @@ from .views import (
     check_phone_number,
     bind_phone_number,
     get_price_info,
-    get_freeze
+    get_freeze,
+    create_order,
+    payment_callback
 )
 
 urlpatterns = [
@@ -21,4 +23,6 @@ urlpatterns = [
     path('/phone-number/bind', bind_phone_number, name='bind_phone_number'),
     path('/get-price-info/<int:fid>', get_price_info),
     path('/get-freeze', get_freeze),
+    path('/create-order', create_order),
+    path('/pay/callback', payment_callback),
 ]
