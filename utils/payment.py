@@ -24,7 +24,12 @@ def unified_order(open_id, out_trade_no, total_price):
     }
     try:
       resp = requests.post(request_url, json=data, headers=headers)
+      print('---')
+      print('debug')
+      print(resp)
       resp = resp.json()
+      print('json')
+      print(resp)
 
       errcode = resp.get('errcode', None)
       if errcode != 0:
