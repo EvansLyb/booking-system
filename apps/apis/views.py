@@ -144,6 +144,7 @@ def get_freeze(request):
                 "facility_id": int(fid),
                 "date": date,
                 "weights": freeze.weights,
+                "is_lock": freeze.is_lock,
                 "time": freeze.time
             })
         return JsonResponse(resp, safe=False)
