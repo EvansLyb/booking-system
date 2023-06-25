@@ -293,7 +293,7 @@ def get_order_list(request):
         resp = {
             "errcode": 1,
             "errmsg": "",
-            list: []
+            "list": []
         }
         for order in order_list:
             facility_id = order.facility_id
