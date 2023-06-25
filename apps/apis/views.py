@@ -5,6 +5,7 @@ Copyright (c) 2019 - present Kyle
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.serializers import serialize
+from django.db.models import Q
 
 import json
 import requests
@@ -138,6 +139,11 @@ def get_freeze(request):
             facility_id=int(fid),
             date=date,
             lock_count__gt=0
+        ) | Freeze.objects.filter(
+            facility_id=int(fid),
+            date=date,
+            is_order=True,
+            weights__gt=0
         )
         for freeze in freeze_list:
             resp.append({
@@ -152,6 +158,7 @@ def get_freeze(request):
 
 def create_order(request):
     def _freeze(facility_id, date, time_list, court_type):
+        # data check
         for time_str in time_list:
             time_obj = datetime.datetime.strptime(time_str, '%H:%M')
             freeze = Freeze.objects.filter(facility_id=facility_id, date=date, time=datetime.time(hour=time_obj.hour, minute=time_obj.minute)).first()
@@ -160,9 +167,13 @@ def create_order(request):
                     raise Exception('Already sold out. facility_id={}, date={}, time={}, court_type={}'.format(facility_id, date, time_str, court_type))
                 if freeze.is_lock and freeze.lock_count > 0:
                     raise Exception('Locked')
+        # freeze
+        for time_str in time_list:
+            time_obj = datetime.datetime.strptime(time_str, '%H:%M')
+            freeze = Freeze.objects.filter(facility_id=facility_id, date=date, time=datetime.time(hour=time_obj.hour, minute=time_obj.minute)).first()
+            if freeze:
                 freeze.is_order = True
                 freeze.weights = freeze.weights + get_freeze_weights_by_court_type(court_type)
-                freeze.save()
             else:
                 freeze = Freeze(
                     facility_id=facility_id,
@@ -171,17 +182,17 @@ def create_order(request):
                     is_order=True,
                     weights=get_freeze_weights_by_court_type(court_type)
                 )
-                freeze.save()
+            freeze.save()
 
     if request.method == 'POST':
         open_id = request.headers.get('X-Wx-Openid', '')
         if not open_id:
-            return JsonResponse({}, safe=False, status=400)
+            return JsonResponse({"errcode": 1, "errmsg": ""}, safe=False, status=400)
 
         user = User.objects.filter(open_id=open_id).first()
         if not user:
             print('User does not exist, open_id: {}'.format(open_id))
-            return JsonResponse({}, safe=False, status=400)
+            return JsonResponse({"errcode": 1, "errmsg": ""}, safe=False, status=400)
 
         json_data = json.loads(request.body)
         total_price = json_data.get('total_price', None)
@@ -191,7 +202,14 @@ def create_order(request):
         time_list = json_data.get('time_list', [])
         remark = json_data.get('remark', '')
         if not total_price or not facility_id or not date or not court_type or len(time_list) == 0:
-            return JsonResponse({}, safe=False, status=400)
+            return JsonResponse({"errcode": 1, "errmsg": ""}, safe=False, status=400)
+
+        try:
+            _freeze(facility_id, date, time_list, court_type)
+        except Exception as e:
+            print("Failed: create_order")
+            print(e)
+            return JsonResponse({"errcode": 1, "errmsg": str(e)}, safe=False, status=400)
 
         if total_price == 0:
             Order.objects.create(
@@ -204,17 +222,12 @@ def create_order(request):
                 time_list=time_list,
                 remark=remark
             )
-            try:
-                _freeze(facility_id, date, time_list, court_type)
-            except Exception as e:
-                print("Failed: create_order")
-                print(e)
-                return JsonResponse({"errMsg": e}, safe=False, status=400)
-            return JsonResponse({}, safe=False, status=201)
+            return JsonResponse({"errcode": 0, "errmsg": ""}, safe=False, status=201)
         else:
             now = datetime.datetime.now()
             trade_no = str(now).replace('.', '').replace('-', '').replace(':', '').replace(' ', '')
-            resp = unified_order(open_id=open_id, out_trade_no=trade_no, total_price=total_price)
+            ip = request.headers.get('X-Original-Forwarded-For', '127.0.0.1')
+            resp = unified_order(open_id=open_id, out_trade_no=trade_no, total_price=total_price, ip=ip)
             resp_data = resp.get('respdata', {})
             order = Order.objects.create(
                 facility_id=facility_id,
@@ -233,14 +246,6 @@ def create_order(request):
                 trade_no=trade_no,
                 nonce_str=resp_data.get('nonce_str', '')
             )
-
-            try:
-                _freeze(facility_id, date, time_list, court_type)
-            except Exception as e:
-                print("Failed: create_order")
-                print(e)
-                return JsonResponse({"errMsg": e}, safe=False, status=400)
-
             payment_data = resp_data.get('payment', {})
             return JsonResponse(payment_data, safe=False, status=201)
 
