@@ -212,7 +212,7 @@ def create_order(request):
             return JsonResponse({"errcode": 1, "errmsg": str(e)}, safe=False, status=400)
 
         if total_price == 0:
-            Order.objects.create(
+            order = Order.objects.create(
                 facility_id=facility_id,
                 user_id=user.id,
                 status=OrderStatus.PENDING_CONFIRMATION,
@@ -222,7 +222,7 @@ def create_order(request):
                 time_list=time_list,
                 remark=remark
             )
-            return JsonResponse({"errcode": 0, "errmsg": ""}, safe=False, status=201)
+            return JsonResponse({"errcode": 0, "errmsg": "", "order_id": order.id}, safe=False, status=201)
         else:
             now = datetime.datetime.now()
             trade_no = str(now).replace('.', '').replace('-', '').replace(':', '').replace(' ', '')
@@ -249,6 +249,7 @@ def create_order(request):
             payment_data = resp_data.get('payment', {})
             payment_data["errcode"] = 0
             payment_data["errmsg"] = ""
+            payment_data["order_id"] = order.id
             return JsonResponse(payment_data, safe=False, status=201)
 
 
