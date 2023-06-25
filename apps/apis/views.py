@@ -247,6 +247,8 @@ def create_order(request):
                 nonce_str=resp_data.get('nonce_str', '')
             )
             payment_data = resp_data.get('payment', {})
+            payment_data["errcode"] = 0
+            payment_data["errmsg"] = ""
             return JsonResponse(payment_data, safe=False, status=201)
 
 
