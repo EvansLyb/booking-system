@@ -276,3 +276,63 @@ def payment_callback(request):
         "errcode": 0,
         "errmsg": ""
     }, safe=False, status=200)
+
+
+def get_order_list(request):
+    if request.method == 'GET':
+        open_id = request.headers.get('X-Wx-Openid', '')
+        if not open_id:
+            return JsonResponse({"errcode": 1, "errmsg": "", list: []}, safe=False, status=400)
+
+        user = User.objects.filter(open_id=open_id).first()
+        if not user:
+            print('User does not exist, open_id: {}'.format(open_id))
+            return JsonResponse({"errcode": 1, "errmsg": "", list: []}, safe=False, status=400)
+
+        order_list = Order.objects.filter(user_id=user.id).order_by("updated_at")
+        resp = {
+            "errcode": 1,
+            "errmsg": "",
+            list: []
+        }
+        for order in order_list:
+            facility_id = order.facility_id
+            facility = Facility.objects.filter(id=facility_id).first()
+            resp.list.append({
+                "facility_name": facility.name,
+                "status": order.status,
+                "date": order.date,
+                "court_type": order.court_type,
+                "price": order.price
+            })
+        return JsonResponse(resp, safe=False, status=200)
+
+
+def get_order_details(request, oid=None):
+    if request.method == 'GET':
+        resp = {
+            "errcode": 0,
+            "errmsg": ""
+        }
+
+        if not oid:
+            resp["errcode"] = 1
+            return JsonResponse(resp, safe=False, status=400)
+
+        order = Order.objects.filter(id=oid).first()
+        if not order:
+            resp["errcode"] = 1
+            return JsonResponse(resp, safe=False, status=404)
+
+        facility_id = order.facility_id
+        facility = Facility.objects.filter(id=facility_id).first()
+        resp["facility_name"] = facility.name
+        resp["status"] = order.status
+        resp["date"] = order.date
+        resp["court_type"] = order.court_type
+        resp["price"] = order.price
+        resp["created_at"] = order.created_at
+        resp["updated_at"] = order.updated_at
+        resp["remark"] = order.remark
+        resp["time_list"] = order.time_list
+        return JsonResponse(resp, safe=False, status=200)

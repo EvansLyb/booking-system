@@ -13,7 +13,9 @@ from .views import (
     get_price_info,
     get_freeze,
     create_order,
-    payment_callback
+    payment_callback,
+    get_order_list,
+    get_order_details
 )
 
 urlpatterns = [
@@ -25,4 +27,6 @@ urlpatterns = [
     path('/get-freeze', get_freeze),
     path('/create-order', create_order),
     path('/pay/callback', payment_callback),
+    path('/order-list', get_order_list),
+    path('/order/<int:oid>', get_order_details),
 ]
