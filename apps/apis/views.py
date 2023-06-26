@@ -291,7 +291,7 @@ def get_order_list(request):
 
         order_list = Order.objects.filter(user_id=user.id).order_by("updated_at")
         resp = {
-            "errcode": 1,
+            "errcode": 0,
             "errmsg": "",
             "list": []
         }
