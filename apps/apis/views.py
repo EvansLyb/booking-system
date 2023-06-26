@@ -304,7 +304,8 @@ def get_order_list(request):
                 "status": order.status,
                 "date": order.date,
                 "court_type": order.court_type,
-                "price": order.price
+                "price": order.price,
+                "time_list": order.time_list
             })
         return JsonResponse(resp, safe=False, status=200)
 
