@@ -10,6 +10,7 @@ from django.db.models import Q
 import json
 import requests
 import datetime
+import ast
 
 from apps.dashboard.models import Facility, Stadium, FacilityCoverImage, Price, Freeze, Order, Bill, OrderStatus, BillType
 from apps.apis.models import User
@@ -305,7 +306,7 @@ def get_order_list(request):
                 "date": order.date,
                 "court_type": order.court_type,
                 "price": order.price,
-                "time_list": order.time_list
+                "time_list": ast.literal_eval(order.time_list)
             })
         return JsonResponse(resp, safe=False, status=200)
 
