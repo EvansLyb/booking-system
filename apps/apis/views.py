@@ -289,7 +289,7 @@ def get_order_list(request):
             print('User does not exist, open_id: {}'.format(open_id))
             return JsonResponse({"errcode": 1, "errmsg": "", list: []}, safe=False, status=400)
 
-        order_list = Order.objects.filter(user_id=user.id).order_by("updated_at")
+        order_list = Order.objects.filter(user_id=user.id).order_by("-updated_at")
         resp = {
             "errcode": 0,
             "errmsg": "",
