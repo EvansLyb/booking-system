@@ -6,6 +6,7 @@ Copyright (c) 2019 - present Kyle
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.serializers import serialize
 from django.db.models import Q
+from django.conf import settings
 
 import json
 import requests
@@ -339,3 +340,37 @@ def get_order_details(request, oid=None):
         resp["remark"] = order.remark
         resp["time_list"] = ast.literal_eval(order.time_list)
         return JsonResponse(resp, safe=False, status=200)
+
+
+def send_sms(request):
+    request_url = "http://api.weixin.qq.com/tcb/sendsmsv2"
+    headers = {
+        "Content-Type": "application/json;charset=UTF-8"
+    }
+    data = {
+        "env_id": settings.CLOUD_ENV,
+        "url_link": "https://booking-system-53634-7-1318564604.sh.run.tcloudbase.com",
+        "template_id": "844110",
+        "template_param_list": ["测试一下短信"],
+        "phone_number_list": [
+            "+8613751787141"
+        ],
+        "use_short_name": True,
+        "resource_appid": "wx07aa26735a64ea3a"
+    }
+    try:
+      resp = requests.post(request_url, json=data, headers=headers)
+      resp = resp.json()
+      print('request sendsmsv2, resp:')
+      print(resp)
+
+      errcode = resp.get('errcode', None)
+      if errcode != 0:
+          print("Failed: send_sms")
+          print(resp.get("errmsg", ""))
+          raise Exception(resp.get("errmsg", ""))
+      return JsonResponse(resp, safe=False, status=201)
+    except Exception as e:
+        print("Failed: send_sms")
+        print(e)
+        raise e
