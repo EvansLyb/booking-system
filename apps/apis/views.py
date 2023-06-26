@@ -299,6 +299,7 @@ def get_order_list(request):
             facility_id = order.facility_id
             facility = Facility.objects.filter(id=facility_id).first()
             resp['list'].append({
+                "id": order.id,
                 "facility_name": facility.name,
                 "status": order.status,
                 "date": order.date,
