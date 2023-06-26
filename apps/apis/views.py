@@ -337,5 +337,5 @@ def get_order_details(request, oid=None):
         resp["created_at"] = order.created_at
         resp["updated_at"] = order.updated_at
         resp["remark"] = order.remark
-        resp["time_list"] = order.time_list
+        resp["time_list"] = ast.literal_eval(order.time_list)
         return JsonResponse(resp, safe=False, status=200)
