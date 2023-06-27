@@ -16,6 +16,7 @@ import ast
 from apps.dashboard.models import Facility, Stadium, FacilityCoverImage, Price, Freeze, Order, Bill, OrderStatus, BillType
 from apps.apis.models import User
 from utils.payment import unified_order
+from utils.sms import send_sms
 from utils.util import get_freeze_weights_by_court_type
 
 
@@ -342,33 +343,9 @@ def get_order_details(request, oid=None):
         return JsonResponse(resp, safe=False, status=200)
 
 
-def send_sms(request):
-    request_url = "http://api.weixin.qq.com/tcb/sendsmsv2"
-    headers = {
-        "Content-Type": "application/json;charset=UTF-8"
-    }
-    data = {
-        "env_id": settings.CLOUD_ENV,
-        "url_link": "https://booking-system-53634-7-1318564604.sh.run.tcloudbase.com",
-        "template_id": "844110",
-        "template_param_list": ["测试一下短信"],
-        "phone_number_list": [
-            "+8613751787141"
-        ],
-        "use_short_name": True,
-        "resource_appid": "wx07aa26735a64ea3a"
-    }
+def t_send_sms(request):
     try:
-      resp = requests.post(request_url, json=data, headers=headers)
-      resp = resp.json()
-      print('request sendsmsv2, resp:')
-      print(resp)
-
-      errcode = resp.get('errcode', None)
-      if errcode != 0:
-          print("Failed: send_sms")
-          print(resp.get("errmsg", ""))
-          raise Exception(resp.get("errmsg", ""))
+      resp = send_sms()
       return JsonResponse(resp, safe=False, status=201)
     except Exception as e:
         print("Failed: send_sms")
