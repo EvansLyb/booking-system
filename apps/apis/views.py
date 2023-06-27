@@ -17,7 +17,7 @@ from apps.dashboard.models import Facility, Stadium, FacilityCoverImage, Price, 
 from apps.apis.models import User
 from utils.payment import unified_order
 from utils.sms import send_sms
-from utils.util import get_freeze_weights_by_court_type
+from utils.util import get_freeze_weights_by_court_type, generate_order_no, generate_trade_no
 
 
 def get_facility_list(request):
@@ -216,6 +216,7 @@ def create_order(request):
 
         if total_price == 0:
             order = Order.objects.create(
+                order_no=generate_order_no(),
                 facility_id=facility_id,
                 user_id=user.id,
                 status=OrderStatus.PENDING_CONFIRMATION,
@@ -227,12 +228,12 @@ def create_order(request):
             )
             return JsonResponse({"errcode": 0, "errmsg": "", "order_id": order.id}, safe=False, status=201)
         else:
-            now = datetime.datetime.now()
-            trade_no = str(now).replace('.', '').replace('-', '').replace(':', '').replace(' ', '')
+            trade_no = generate_trade_no()
             ip = request.headers.get('X-Original-Forwarded-For', '127.0.0.1')
             resp = unified_order(open_id=open_id, out_trade_no=trade_no, total_price=total_price, ip=ip)
             resp_data = resp.get('respdata', {})
             order = Order.objects.create(
+                order_no=generate_order_no(),
                 facility_id=facility_id,
                 user_id=user.id,
                 status=OrderStatus.PENDING_PAYMENT,
@@ -303,6 +304,7 @@ def get_order_list(request):
             facility = Facility.objects.filter(id=facility_id).first()
             resp['list'].append({
                 "id": order.id,
+                "order_no": order.order_no,
                 "facility_name": facility.name,
                 "status": order.status,
                 "date": order.date,
@@ -331,7 +333,19 @@ def get_order_details(request, oid=None):
 
         facility_id = order.facility_id
         facility = Facility.objects.filter(id=facility_id).first()
+        cover_image_obj = FacilityCoverImage.objects.filter(facility=facility).first()
         resp["facility_name"] = facility.name
+        resp["facility_image"] = cover_image_obj.file_id
+
+        stadium = Stadium.objects.all().first()
+        resp["stadium_location"] = stadium.location
+        resp["stadium_latitude"] = stadium.latitude
+        resp["stadium_longitude"] = stadium.longitude
+
+        user = User.objects.filter(id=order.user_id).first()
+        resp["phone_number"] = user.phone_number
+
+        resp["order_no"] = order.order_no
         resp["status"] = order.status
         resp["date"] = order.date
         resp["court_type"] = order.court_type

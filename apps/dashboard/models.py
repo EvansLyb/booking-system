@@ -95,6 +95,7 @@ class OrderStatus(models.TextChoices):
 
 
 class Order(models.Model):
+    order_no = models.CharField('order_no', max_length=64, null=False)
     facility_id = models.BigIntegerField('facility_id', blank=False)
     user_id = models.BigIntegerField('user_id', blank=False, null=False)
     status = models.CharField(max_length=255, choices=OrderStatus.choices, default=OrderStatus.PENDING_PAYMENT)
