@@ -16,7 +16,8 @@ class FacilityForm(ModelForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Name",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     # cover_image_list = forms.ImageField(
@@ -34,7 +35,8 @@ class FacilityForm(ModelForm):
         widget=CKEditorUploadingWidget(
             attrs={
                 "placeholder": "description",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
 

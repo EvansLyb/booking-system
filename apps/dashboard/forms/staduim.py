@@ -15,7 +15,8 @@ class StadiumForm(ModelForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Name",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     longitude = forms.FloatField(
@@ -25,7 +26,8 @@ class StadiumForm(ModelForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "location - longitude",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     latitude = forms.FloatField(
@@ -35,7 +37,8 @@ class StadiumForm(ModelForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "location - latitude",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     location = forms.CharField(
@@ -43,7 +46,8 @@ class StadiumForm(ModelForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Location",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     description = forms.CharField(
@@ -51,7 +55,8 @@ class StadiumForm(ModelForm):
         widget=forms.Textarea(
             attrs={
                 "placeholder": "Description",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
 

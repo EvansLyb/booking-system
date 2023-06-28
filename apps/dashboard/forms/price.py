@@ -49,7 +49,8 @@ class PriceForm(ModelForm):
         widget=forms.TimeInput(
             attrs={
                 "placeholder": "Closing Time",
-                "class": "form-control datetimepicker closingtimepicker"
+                "class": "form-control datetimepicker closingtimepicker",
+                "autocomplete": "off"
             },
             format="%H:%M"
         ))
@@ -60,6 +61,7 @@ class PriceForm(ModelForm):
                 "placeholder": "Full Day Price",
                 "class": "form-control price-input",
                 "MAXLENGTH": "10",
+                "autocomplete": "off"
             }
         )
     )
@@ -70,6 +72,7 @@ class PriceForm(ModelForm):
                 "placeholder": "Normal Hourly Price",
                 "class": "form-control price-input",
                 "MAXLENGTH": "10",
+                "autocomplete": "off"
             }
         )
     )
@@ -80,6 +83,7 @@ class PriceForm(ModelForm):
                 "placeholder": "Peek Hourly Price",
                 "class": "form-control price-input",
                 "MAXLENGTH": "10",
+                "autocomplete": "off"
             }
         )
     )
@@ -87,7 +91,8 @@ class PriceForm(ModelForm):
         required=False,
         widget=forms.TimeInput(
             attrs={
-                "class": "form-control datetimepicker peektimefrompicker"
+                "class": "form-control datetimepicker peektimefrompicker",
+                "autocomplete": "off"
             },
             format="%H:%M"
         ))
@@ -95,7 +100,8 @@ class PriceForm(ModelForm):
         required=False,
         widget=forms.TimeInput(
             attrs={
-                "class": "form-control datetimepicker peektimetopicker"
+                "class": "form-control datetimepicker peektimetopicker",
+                "autocomplete": "off"
             },
             format="%H:%M"
         ))

@@ -9,6 +9,8 @@ from ckeditor_uploader.fields import RichTextUploadingField
 import datetime
 from decimal import Decimal
 
+from apps.apis.models import User
+
 
 class Stadium(models.Model):
     name = models.CharField('name', max_length=256, blank=False)
@@ -106,6 +108,15 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now_add=True, null=True)
     remark = models.CharField(max_length=2048, null=True, blank=True)
     time_list = models.CharField(max_length=2048, null=False)  # ["08:30", "12:00", "19:00"]
+
+    @property
+    def facility_name(self):
+        facility_name = Facility.objects.get(id=self.facility_id).name
+        return facility_name
+
+    @property
+    def phone_number(self):
+        return User.objects.get(id=self.user_id).phone_number
 
 
 class BillType(models.TextChoices):

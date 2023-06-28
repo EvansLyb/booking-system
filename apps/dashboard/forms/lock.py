@@ -26,7 +26,8 @@ class LockForm(Form):
         widget=forms.DateInput(
             attrs={
                 "placeholder": "From",
-                "class": "form-control fromdatepicker"
+                "class": "form-control fromdatepicker",
+                "autocomplete": "off"
             },
         ))
     to_date = forms.DateField(
@@ -34,7 +35,8 @@ class LockForm(Form):
         widget=forms.DateInput(
             attrs={
                 "placeholder": "To",
-                "class": "form-control todatepicker"
+                "class": "form-control todatepicker",
+                "autocomplete": "off"
             },
         ))
     from_time = forms.TimeField(
@@ -42,7 +44,8 @@ class LockForm(Form):
         widget=forms.TimeInput(
             attrs={
                 "placeholder": "From",
-                "class": "form-control fromtimepicker"
+                "class": "form-control fromtimepicker",
+                "autocomplete": "off"
             },
             format="%H:%M"
         ))
@@ -51,7 +54,8 @@ class LockForm(Form):
         widget=forms.TimeInput(
             attrs={
                 "placeholder": "To",
-                "class": "form-control totimepicker"
+                "class": "form-control totimepicker",
+                "autocomplete": "off"
             },
             format="%H:%M"
         ))

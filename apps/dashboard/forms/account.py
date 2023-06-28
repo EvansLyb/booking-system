@@ -14,7 +14,8 @@ class AccountForm(UserCreationForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Username",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     email = forms.EmailField(
@@ -22,21 +23,24 @@ class AccountForm(UserCreationForm):
         widget=forms.EmailInput(
             attrs={
                 "placeholder": "Email",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     password1 = forms.CharField(
         widget=forms.PasswordInput(
             attrs={
                 "placeholder": "Password",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     password2 = forms.CharField(
         widget=forms.PasswordInput(
             attrs={
                 "placeholder": "Confirm Password",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     first_name = forms.CharField(
@@ -44,7 +48,8 @@ class AccountForm(UserCreationForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "First Name",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     last_name = forms.CharField(
@@ -52,7 +57,8 @@ class AccountForm(UserCreationForm):
         widget=forms.TextInput(
             attrs={
                 "placeholder": "Last Name",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     phone_number = forms.CharField(
@@ -60,7 +66,8 @@ class AccountForm(UserCreationForm):
         widget=forms.NumberInput(
             attrs={
                 "placeholder": "Phone Number",
-                "class": "form-control"
+                "class": "form-control",
+                "autocomplete": "off"
             }
         ))
     is_super_admin = forms.BooleanField(

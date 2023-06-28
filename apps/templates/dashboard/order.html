@@ -1,0 +1,176 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Orders {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+  .form-check input[type="checkbox"] {
+    opacity: 1;
+    visibility: visible;
+  }
+</style>
+{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card ">
+          <div class="card-header">
+            <form id="filter" role="form" method="get" action="">
+              <div class="row align-items-center">
+                <div class="form-group col w-50">
+                  <div class="d-flex align-items-center">
+                    <label style="padding-right: 2%;">Date: </label>
+                    <div>
+                      <input type="text" name="from_date" class="form-control fromdatepicker" autocomplete="off" id="id_from_date">
+                    </div>
+                    <div style="padding: 0 10px;">-</div>
+                    <div>
+                      <input type="text" name="to_date" class="form-control todatepicker" autocomplete="off" id="id_to_date">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group col w-50">
+                  <div class="d-flex align-items-center">
+                    <label style="padding-right: 2%;">Phone Number: </label>
+                    <div>
+                      <input type="number" name="phone_number" class="form-control" autocomplete="off" id="id_phone_number">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row align-items-center">
+                <div class="form-group col w-75">
+                  <label style="padding-right: 2%;">Status: </label>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" name="status" type="checkbox" id="id_status_0" value="Pending Payment">
+                    <label class="form-check-label" for="id_status_0">Pending Payment</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" name="status" type="checkbox" id="id_status_1" value="Pending Confirmation">
+                    <label class="form-check-label" for="id_status_1">Pending Confirmation</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" name="status" type="checkbox" id="id_status_2" value="Accepted">
+                    <label class="form-check-label" for="id_status_2">Accepted</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" name="status" type="checkbox" id="id_status_3" value="Rejected">
+                    <label class="form-check-label" for="id_status_3">Rejected</label>
+                  </div>
+                </div>
+              </div>
+              <button id="btn-filter" type="button card-title" class="btn btn-primary">Filter</button>
+            </form>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table tablesorter " id="">
+                <thead class=" text-primary">
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Phone Number</th>
+                    <th>Facility</th>
+                    <th>Date</th>
+                    <th>Court Type</th>
+                    <th>Time</th>
+                    <th>Order Status</th>
+                    <th>Remark</th>
+                    <th>Price</th>
+                    <th class="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for order in order_list %}
+                  <tr>
+                    <td>{{ order.order_no }}</td>
+                    <td>{{ order.phone_number }}</td>
+                    <td>{{ order.facility_name }}</td>
+                    <td>{{ order.date|date:"Y-m-d" }}</td>
+                    <td>{{ order.court_type }}</td>
+                    <td>{{ order.time_list }}</td>
+                    <td style="font-size: 0.6rem;text-align: center;">
+                      {% if order.status == 'Pending Payment' %}
+                      <div style="color: #1E90FF;border: 1px solid #1E90FF;padding: 3px 6px;">{{ order.status }}</div>
+                      {% elif order.status == 'Pending Confirmation' %}
+                      <div style="color: #FFD700;border: 1px solid #FFD700;padding: 3px 6px;">{{ order.status }}</div>
+                      {% elif order.status == 'Accepted' %}
+                      <div style="color: #32CD32;border: 1px solid #32CD32;padding: 3px 6px;">{{ order.status }}</div>
+                      {% elif order.status == 'Rejected' %}
+                      <div style="color: #808080;border: 1px solid #808080;padding: 3px 6px;">{{ order.status }}</div>
+                      {% endif %}
+                    </td>
+                    <td>{{ order.remark }}</td>
+                    <td>{{ order.price }}</td>
+                    <td class="td-actions text-center">
+                      <button type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-id="{{ order.id }}" data-toggle="tooltip" data-placement="top" title="Edit">
+                        <i class="tim-icons icon-settings"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {% if page_count > 0 %}
+          <div class="card-footer">
+            <ul class="pagination justify-content-center">
+              <li class="page-item {% if current_page|add:0 == 1 %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ current_page|add:-1 }}" tabindex="-1">Previous</a>
+              </li>
+              {% for n in page_range %}
+              <li class="page-item {% if n|add:0 == current_page|add:0 or n|add:0 == 1 and not current_page %}active{% endif %}">
+                <a class="page-link" href="?page={{ n }}">{{ n }}</a>
+              </li>
+              {% endfor %}
+              <li class="page-item {% if current_page|add:0 == page_count|add:0 %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ current_page|add:1 }}">Next</a>
+              </li>
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  $(document).ready(function() {
+    var deleteId = null
+
+    $('.fromdatepicker').datetimepicker({
+      timepicker: false,
+      format:'Y-m-d',
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          maxDate: $('.todatepicker').val() ? $('.todatepicker').val() : false
+        })
+      }
+    });
+    $('.todatepicker').datetimepicker({
+      timepicker: false,
+      format:'Y-m-d',
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          minDate: $('.fromdatepicker').val() ? $('.fromdatepicker').val() : false
+        })
+      }
+    });
+
+    $(".btn-edit").on("click", function() {
+      var id = $(this).data("id")
+      window.location.href = "/dashboard/order/" + id
+    })
+  });
+</script>
+{% endblock javascripts %}
