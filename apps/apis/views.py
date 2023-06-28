@@ -203,6 +203,7 @@ def create_order(request):
         date = json_data.get('date', None)
         court_type = json_data.get('court_type', None)
         time_list = json_data.get('time_list', [])
+        is_full_day = json_data.get('is_full_day', False)
         remark = json_data.get('remark', '')
         if not total_price or not facility_id or not date or not court_type or len(time_list) == 0:
             return JsonResponse({"errcode": 1, "errmsg": ""}, safe=False, status=400)
@@ -224,6 +225,7 @@ def create_order(request):
                 court_type=court_type,
                 price=total_price,
                 time_list=time_list,
+                is_full_day=is_full_day,
                 remark=remark
             )
             return JsonResponse({"errcode": 0, "errmsg": "", "order_id": order.id}, safe=False, status=201)
@@ -241,6 +243,7 @@ def create_order(request):
                 court_type=court_type,
                 price=total_price,
                 time_list=time_list,
+                is_full_day=is_full_day,
                 remark=remark
             )
             Bill.objects.create(

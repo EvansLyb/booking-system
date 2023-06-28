@@ -91,7 +91,11 @@
                     <td>{{ order.facility_name }}</td>
                     <td>{{ order.date|date:"Y-m-d" }}</td>
                     <td>{{ order.court_type }}</td>
+                    {% if order.is_full_day %}
+                    <td>Full Day</td>
+                    {% else %}
                     <td>{{ order.time_list }}</td>
+                    {% endif %}
                     <td style="font-size: 0.6rem;text-align: center;">
                       {% if order.status == 'Pending Payment' %}
                       <div style="color: #1E90FF;border: 1px solid #1E90FF;padding: 3px 6px;">{{ order.status }}</div>
