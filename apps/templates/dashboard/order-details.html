@@ -1,0 +1,163 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Order Details {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+</style>
+{% endblock stylesheets %}
+
+{% load format_order_time_list %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="card ">
+      <div class="card-header">
+        Basic Info
+      </div>
+      <div class="card-body">
+        <blockquote class="blockquote mb-0">
+          <div>
+            <label>Order ID</label>
+            <p>{{order.order_no}}</p>
+          </div>
+          <div>
+            <label>Phone Number</label>
+            <p>{{order.phone_number}}</p>
+          </div>
+          <div>
+            <label>Facility</label>
+            <p>{{order.facility_name}}</p>
+          </div>
+          <div>
+            <label>Date</label>
+            <p>{{order.date|date:"Y-m-d"}}</p>
+          </div>
+          <div>
+            <label>Court Type</label>
+            <p>{{order.court_type}}</p>
+          </div>
+          <div>
+            <label>Time</label>
+            <div style="font-size: 0.6rem;text-align: center;white-space:nowrap;display: flex;">
+              {% for time_slot in order.time_list|format_order_time_list %}
+              <div style="color: #e0e0e0;border: 1px solid #e0e0e0;padding: 3px 6px;margin-bottom:2px;margin-right: 12px;">{{time_slot}}</div>
+              {% endfor %}
+            </div>
+          </div>
+          <div>
+            <label>Order Status</label>
+            <div style="font-size: 0.6rem;text-align: center;width: fit-content;">
+              {% if order.status == 'Pending Payment' %}
+              <div style="color: #1E90FF;border: 1px solid #1E90FF;padding: 3px 6px;">{{ order.status }}</div>
+              {% elif order.status == 'Pending Confirmation' %}
+              <div style="color: #FFD700;border: 1px solid #FFD700;padding: 3px 6px;">{{ order.status }}</div>
+              {% elif order.status == 'Accepted' %}
+              <div style="color: #32CD32;border: 1px solid #32CD32;padding: 3px 6px;">{{ order.status }}</div>
+              {% elif order.status == 'Rejected' %}
+              <div style="color: #808080;border: 1px solid #808080;padding: 3px 6px;">{{ order.status }}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div>
+            <label>Created At</label>
+            <p>{{order.created_at|date:"Y-m-d"}} {{order.created_at|date:"H:i:s"}}</p>
+          </div>
+          <div>
+            <label>Updated At</label>
+            <p>{{order.updated_at|date:"Y-m-d"}} {{order.updated_at|date:"H:i:s"}}</p>
+          </div>
+          <div>
+            <label>Total Price</label>
+            <p>{{order.price}}</p>
+          </div>
+          <div>
+            <label>Remark</label>
+            <p>{{order.remark|default:'""'}}</p>
+          </div>
+        </blockquote>
+      </div>
+      <div class="card-header">
+        Bills
+      </div>
+      <div class="card-body">
+        {% for bill in bill_list %}
+        <blockquote class="blockquote mb-0">
+          <div>
+            <label>Bill Type</label>
+            <p>{{bill.bill_type}}</p>
+          </div>
+          <div>
+            <label>Amount</label>
+            <p>{{bill.amount}}</p>
+          </div>
+          <div>
+            <label>Created At</label>
+            <p>{{bill.created_at|date:"Y-m-d"}} {{bill.created_at|date:"H:i:s"}}</p>
+          </div>
+        </blockquote>
+        {% endfor %}
+      </div>
+    </div>
+    <div id="errmsg" class="alert alert-danger" style="display: none;" role="alert">
+      Something went wrong while updating order status.
+    </div>
+    <div class="d-flex align-items-center justify-content-between">
+      <button onclick="window.location.href = '/dashboard/order/list'" type="button" class="btn">Back</button>
+      {% if order.status == 'Pending Confirmation' %}
+      <div>
+        <button id="btn-accept" type="button" class="btn btn-primary" data-order_no="{{order.order_no}}">Accept</button>
+        <button id="btn-reject" type="button" class="btn btn-danger" data-order_no="{{order.order_no}}">Reject</button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  $(document).ready(function() {
+    $("#btn-accept").click(function () {
+      const orderNo = $(this).data("order_no")
+      fetch(`/dashboard/order/${orderNo}/status`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "Accepted"
+        }),
+      }).then(function(res) {
+        if (res.ok) {
+          location.reload()
+        } else {
+          $("#errmsg").css({ display: "block" })
+        }
+      })
+    })
+
+    $("#btn-reject").click(function () {
+      const orderNo = $(this).data("order_no")
+      fetch(`/dashboard/order/${orderNo}/status`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          status: "Rejected"
+        }),
+      }).then(function(res) {
+        if (res.ok) {
+          location.reload()
+        } else {
+          $("#errmsg").css({ display: "block" })
+        }
+      })
+    })
+  });
+</script>
+{% endblock javascripts %}

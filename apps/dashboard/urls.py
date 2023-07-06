@@ -8,7 +8,7 @@ from apps.dashboard import views_old
 from apps.dashboard.views_old import AccountListView, StadiumListView, StadiumView, AccountView, PriceView, PriceListView
 from .views.lock import LockView, get_lock_info
 from .views.facility import FacilityListView, FacilityView, FacilityCoverImageView, get_cover_image_list, download_cover_image_by_url, get_upload_image_info, delete_cover_image_by_file_id
-from .views.order import OrderListView
+from .views.order import OrderListView, OrderDetailsView, OrderStatusView
 
 urlpatterns = [
 
@@ -33,6 +33,8 @@ urlpatterns = [
     path('/facility/get-upload-file-info', get_upload_image_info),
     path('/facility/delete-cover-image-by-file-id', delete_cover_image_by_file_id),
     path('/order/list', OrderListView.as_view()),
+    path('/order/<str:order_no>/details', OrderDetailsView.as_view()),
+    path('/order/<str:order_no>/status', OrderStatusView.as_view()),
 
     # # Matches any html file
     re_path(r'^.*\.*', views_old.pages, name='dashboard_pages'),

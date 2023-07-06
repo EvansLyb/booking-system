@@ -99,7 +99,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-if os.environ.get('DB_ENGINE') and os.environ.get('DB_ENGINE') == "mysql":
+if False and os.environ.get('DB_ENGINE') and os.environ.get('DB_ENGINE') == "mysql":
     DATABASES = { 
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -112,23 +112,23 @@ if os.environ.get('DB_ENGINE') and os.environ.get('DB_ENGINE') == "mysql":
         }
     }
 else:
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.mysql',
-    #         'NAME': "booking",
-    #         'USER': "booking",
-    #         'HOST': "sh-cynosdbmysql-grp-6u62u5z2.sql.tencentcdb.com:25670".split(':')[0],
-    #         'PORT': "sh-cynosdbmysql-grp-6u62u5z2.sql.tencentcdb.com:25670".split(':')[1],
-    #         'PASSWORD': "book123@",
-    #         'OPTIONS': {'charset': 'utf8mb4'},
-    #     }
-    # }
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'db.sqlite3',
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': "booking",
+            'USER': "booking",
+            'HOST': "sh-cynosdbmysql-grp-6u62u5z2.sql.tencentcdb.com:25670".split(':')[0],
+            'PORT': "sh-cynosdbmysql-grp-6u62u5z2.sql.tencentcdb.com:25670".split(':')[1],
+            'PASSWORD': "book123@",
+            'OPTIONS': {'charset': 'utf8mb4'},
         }
     }
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.sqlite3',
+    #         'NAME': 'db.sqlite3',
+    #     }
+    # }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

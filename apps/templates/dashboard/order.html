@@ -12,6 +12,9 @@
 </style>
 {% endblock stylesheets %}
 
+{% load get_list %}
+{% load format_order_time_list %}
+
 {% block content %}
 
   <div class="content">
@@ -25,11 +28,11 @@
                   <div class="d-flex align-items-center">
                     <label style="padding-right: 2%;">Date: </label>
                     <div>
-                      <input type="text" name="from_date" class="form-control fromdatepicker" autocomplete="off" id="id_from_date">
+                      <input type="text" name="from_date" class="form-control fromdatepicker" autocomplete="off" id="id_from_date" value={{request.GET.from_date}}>
                     </div>
                     <div style="padding: 0 10px;">-</div>
                     <div>
-                      <input type="text" name="to_date" class="form-control todatepicker" autocomplete="off" id="id_to_date">
+                      <input type="text" name="to_date" class="form-control todatepicker" autocomplete="off" id="id_to_date" value={{request.GET.to_date}}>
                     </div>
                   </div>
                 </div>
@@ -37,7 +40,7 @@
                   <div class="d-flex align-items-center">
                     <label style="padding-right: 2%;">Phone Number: </label>
                     <div>
-                      <input type="number" name="phone_number" class="form-control" autocomplete="off" id="id_phone_number">
+                      <input type="number" name="phone_number" class="form-control" autocomplete="off" id="id_phone_number" value={{request.GET.phone_number}}>
                     </div>
                   </div>
                 </div>
@@ -46,19 +49,19 @@
                 <div class="form-group col w-75">
                   <label style="padding-right: 2%;">Status: </label>
                   <div class="form-check form-check-inline">
-                    <input class="form-check-input" name="status" type="checkbox" id="id_status_0" value="Pending Payment">
+                    <input class="form-check-input" name="status" type="checkbox" id="id_status_0" value="Pending Payment" {% if 'Pending Payment' in request.GET|get_list:'status' %}checked{% endif %}>
                     <label class="form-check-label" for="id_status_0">Pending Payment</label>
                   </div>
                   <div class="form-check form-check-inline">
-                    <input class="form-check-input" name="status" type="checkbox" id="id_status_1" value="Pending Confirmation">
+                    <input class="form-check-input" name="status" type="checkbox" id="id_status_1" value="Pending Confirmation" {% if 'Pending Confirmation' in request.GET|get_list:'status' %}checked{% endif %}>
                     <label class="form-check-label" for="id_status_1">Pending Confirmation</label>
                   </div>
                   <div class="form-check form-check-inline">
-                    <input class="form-check-input" name="status" type="checkbox" id="id_status_2" value="Accepted">
+                    <input class="form-check-input" name="status" type="checkbox" id="id_status_2" value="Accepted" {% if 'Accepted' in request.GET|get_list:'status' %}checked{% endif %}>
                     <label class="form-check-label" for="id_status_2">Accepted</label>
                   </div>
                   <div class="form-check form-check-inline">
-                    <input class="form-check-input" name="status" type="checkbox" id="id_status_3" value="Rejected">
+                    <input class="form-check-input" name="status" type="checkbox" id="id_status_3" value="Rejected" {% if 'Rejected' in request.GET|get_list:'status' %}checked{% endif %}>
                     <label class="form-check-label" for="id_status_3">Rejected</label>
                   </div>
                 </div>
@@ -80,13 +83,13 @@
                     <th>Order Status</th>
                     <th>Remark</th>
                     <th>Price</th>
-                    <th class="text-center">Actions</th>
+                    <th class="text-center" style="width: 15%;">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for order in order_list %}
                   <tr>
-                    <td>{{ order.order_no }}</td>
+                    <td><a href="/dashboard/order/{{ order.order_no }}/details">{{ order.order_no }}</a></td>
                     <td>{{ order.phone_number }}</td>
                     <td>{{ order.facility_name }}</td>
                     <td>{{ order.date|date:"Y-m-d" }}</td>
@@ -94,7 +97,11 @@
                     {% if order.is_full_day %}
                     <td>Full Day</td>
                     {% else %}
-                    <td>{{ order.time_list }}</td>
+                    <td style="font-size: 0.6rem;text-align: center;white-space:nowrap;">
+                      {% for time_slot in order.time_list|format_order_time_list %}
+                      <div style="color: #e0e0e0;border: 1px solid #e0e0e0;padding: 3px 6px;margin-top:2px;">{{time_slot}}</div>
+                      {% endfor %}
+                    </td>
                     {% endif %}
                     <td style="font-size: 0.6rem;text-align: center;">
                       {% if order.status == 'Pending Payment' %}
@@ -110,7 +117,10 @@
                     <td>{{ order.remark }}</td>
                     <td>{{ order.price }}</td>
                     <td class="td-actions text-center">
-                      <button type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-id="{{ order.id }}" data-toggle="tooltip" data-placement="top" title="Edit">
+                      <button type="button" rel="tooltip" class="btn btn-primary btn-link btn-icon btn-sm btn-details" data-order_no="{{ order.order_no }}" data-toggle="tooltip" data-placement="top" title="Details">
+                        <i class="tim-icons icon-zoom-split"></i>
+                      </button>
+                      <button type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-order_no="{{ order.order_no }}" data-toggle="tooltip" data-placement="top" title="Edit">
                         <i class="tim-icons icon-settings"></i>
                       </button>
                     </td>
@@ -148,32 +158,13 @@
 {% block javascripts %}
 <script>
   $(document).ready(function() {
-    var deleteId = null
-
-    $('.fromdatepicker').datetimepicker({
-      timepicker: false,
-      format:'Y-m-d',
-      theme: 'dark',
-      onShow: function(ct) {
-        this.setOptions({
-          maxDate: $('.todatepicker').val() ? $('.todatepicker').val() : false
-        })
-      }
-    });
-    $('.todatepicker').datetimepicker({
-      timepicker: false,
-      format:'Y-m-d',
-      theme: 'dark',
-      onShow: function(ct) {
-        this.setOptions({
-          minDate: $('.fromdatepicker').val() ? $('.fromdatepicker').val() : false
-        })
-      }
-    });
-
+    $(".btn-details").on("click", function() {
+      var order_no = $(this).data("order_no")
+      window.location.href = "/dashboard/order/" + order_no + "/details"
+    })
     $(".btn-edit").on("click", function() {
-      var id = $(this).data("id")
-      window.location.href = "/dashboard/order/" + id
+      var order_no = $(this).data("order_no")
+      window.location.href = "/dashboard/order/" + order_no
     })
   });
 </script>
