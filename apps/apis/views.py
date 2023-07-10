@@ -12,12 +12,14 @@ import json
 import requests
 import datetime
 import ast
+from decimal import Decimal
 
 from apps.dashboard.models import Facility, Stadium, FacilityCoverImage, Price, Freeze, Order, Bill, OrderStatus, BillType
 from apps.apis.models import User
 from utils.payment import unified_order
 from utils.sms import send_sms
-from utils.util import get_freeze_weights_by_court_type, generate_order_no, generate_trade_no
+from utils.util import get_freeze_weights_by_court_type, generate_order_no, generate_trade_no, get_order_no_by_trade_no
+from utils.order import calc_checkout_price
 
 
 def get_facility_list(request):
@@ -233,10 +235,6 @@ def create_order(request):
             )
             return JsonResponse({"errcode": 0, "errmsg": "", "order_id": order.id}, safe=False, status=201)
         else:
-            trade_no = generate_trade_no()
-            ip = request.headers.get('X-Original-Forwarded-For', '127.0.0.1')
-            resp = unified_order(open_id=open_id, out_trade_no=trade_no, total_price=total_price, ip=ip)
-            resp_data = resp.get('respdata', {})
             order = Order.objects.create(
                 order_no=generate_order_no(),
                 facility_id=facility_id,
@@ -250,18 +248,37 @@ def create_order(request):
                 is_full_day=is_full_day,
                 remark=remark
             )
-            Bill.objects.create(
-                order_id=order.id,
-                bill_type=BillType.PAYMENT,
-                amount=total_price,
-                trade_no=trade_no,
-                nonce_str=resp_data.get('nonce_str', '')
-            )
-            payment_data = resp_data.get('payment', {})
-            payment_data["errcode"] = 0
-            payment_data["errmsg"] = ""
-            payment_data["order_id"] = order.id
-            return JsonResponse(payment_data, safe=False, status=201)
+            return JsonResponse({"errcode": 0, "errmsg": "", "order_id": order.id}, safe=False, status=201)
+
+
+def checkout(request):
+    if request.method == 'POST':
+        open_id = request.headers.get('X-Wx-Openid', '')
+        if not open_id:
+            return JsonResponse({"errcode": 1, "errmsg": ""}, safe=False, status=400)
+
+        json_data = json.loads(request.body)
+        order_id = json_data.get('order_id', None)
+        if order_id == None:
+            print("Failed: checkout")
+            print("Missing Order ID")
+            return JsonResponse({"errcode": 1, "errmsg": "Missing Order ID"}, safe=False, status=400)
+
+        order = Order.objects.filter(id=order_id).first()
+        if not order:
+            print("Failed: checkout")
+            print("Invalid Order ID")
+            return JsonResponse({"errcode": 1, "errmsg": "Invalid Order ID"}, safe=False, status=400)
+
+        trade_no = generate_trade_no(order.order_no)
+        total_price = calc_checkout_price(order_id, order)
+        ip = request.headers.get('X-Original-Forwarded-For', '127.0.0.1')
+        resp = unified_order(open_id=open_id, out_trade_no=trade_no, total_price=total_price, ip=ip)
+        resp_data = resp.get('respdata', {})
+        payment_data = resp_data.get('payment', {})
+        payment_data["errcode"] = 0
+        payment_data["errmsg"] = ""
+        return JsonResponse(payment_data, safe=False, status=201)
 
 
 def payment_callback(request):
@@ -270,18 +287,28 @@ def payment_callback(request):
     print(json_data)
     transaction_id = json_data.get("transactionId", None)
     trade_no = json_data.get("outTradeNo", None)
-    if transaction_id == None or trade_no == None:
+    price = json_data.get("totalFee", None)
+    nonce_str = json_data.get("nonceStr", None)
+    if transaction_id == None or trade_no == None or price == None or nonce_str == None:
         return JsonResponse({
             "errcode": 1,
             "errmsg": ""
         }, safe=False, status=400)
 
-    bill = Bill.objects.filter(trade_no=trade_no).first()
-    bill.transaction_id = transaction_id
-    bill.save()
-    order = Order.objects.filter(id=bill.order_id).first()
+    order_no = get_order_no_by_trade_no(trade_no)
+    order = Order.objects.filter(order_no=order_no).first()
     order.status = OrderStatus.PENDING_CONFIRMATION
     order.save()
+
+    amount = Decimal(price) / 100
+    Bill.objects.create(
+        order_id=order.id,
+        bill_type=BillType.PAYMENT,
+        amount=amount,
+        trade_no=trade_no,
+        nonce_str=nonce_str,
+        transaction_id=transaction_id
+    )
 
     return JsonResponse({
         "errcode": 0,

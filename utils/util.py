@@ -21,10 +21,13 @@ def generate_order_no():
     return order_no
 
 
-def generate_trade_no():
-    now = datetime.datetime.now()
-    trade_no = str(now).replace('.', '').replace('-', '').replace(':', '').replace(' ', '')
+def generate_trade_no(order_no):
+    trade_no = order_no + str(random.randint(1000, 9999))
     return trade_no
+
+
+def get_order_no_by_trade_no(trade_no):
+    return trade_no[:14]
 
 
 def trans_time_to_slot(time_str):

@@ -268,3 +268,26 @@ class OrderView(LoginRequiredMixin, View):
             "order_status_selector": order_status_selector,
             "current_order_status": current_order_status,
         }, request))
+
+
+@login_required(login_url="/login")
+def update_order_price(request, order_no=None):
+    if request.method == 'POST':
+        if not order_no:
+            raise Http404
+
+        order = Order.objects.filter(order_no=order_no).first()
+        if not order:
+            raise Http404
+
+        resp = {"errcode": 0, "errmsg": ""}
+        json_data = json.loads(request.body)
+        new_price = json_data.get('new_price', None)
+        if new_price == None:
+            print("Failed: update_order_price")
+            print("Wrong price")
+            resp['errcode'] = 1
+            resp['errmsg'] = "Wrong price"
+            return JsonResponse(resp, safe=False)
+
+        return JsonResponse(resp, safe=False)
