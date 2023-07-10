@@ -1,0 +1,217 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Order {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<style>
+  .delete-time-slot:after {
+    display: inline-block;
+    content: "\00d7";
+    cursor: pointer;
+    padding-left: 6px;
+    padding-right: 3px;
+    transform: scale(2);
+  }
+</style>
+{% endblock stylesheets %}
+
+{% load format_order_time_list %}
+{% load format_order_time_to_slot %}
+
+{% block content %}
+  <div class="content">
+    <div class="card">
+      <div class="card-body">
+        <form id="form" role="form" method="post" action="">
+          <div class="form-group">
+            <label>Order ID</label>
+            {{ form.order_no }}
+            {% for error in form.order_no.errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            {{ form.phone_number }}
+            {% for error in form.phone_number.errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            <label>Facility</label>
+            {{ form.facility_id }}
+            {% for error in form.facility_id.errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            {{ form.date }}
+            {% for error in form.date.errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            <label>Court Type</label>
+            {{ form.court_type }}
+            {% for error in form.court_type.errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            <label>Time</label>
+            <div id="time-slot-list" style="font-size: 0.6rem;text-align: center;white-space:nowrap;display: flex;">
+              {% for time in form.time_list.value|format_order_time_list %}
+              <div
+                class="time-slot-tag d-flex"
+                style="color: #e0e0e0;border: 1px solid #e0e0e0;padding: 3px 6px;margin-bottom:2px;margin-right: 12px;"
+              >
+                <div>{{time|format_order_time_to_slot}}</div>
+                <div class="delete-time-slot" data-time="{{time}}"></div>
+              </div>
+              {% endfor %}
+            </div>
+            <input style="margin-top: 6px;" type="text" class="form-control timepicker" autocomplete="off">
+            {{ form.time_list.as_hidden }}
+            {% for error in form.time_list.errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            <label>Order Status</label>
+            <select id="id_status" class="form-control" {% if current_order_status == 'Pending Payment' %}disabled{% endif %}>
+              {% for order_status in order_status_selector %}
+              <option
+                value="{{order_status.0}}"
+                {% if order_status.0 == 'Pending Payment' %}disabled{% endif %}
+                {% if order_status.0 == current_order_status %}selected{% endif %}
+              >{{order_status.0}}</option>
+              {% endfor %}
+            </select>
+            {% for error in form.status.errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            <label>Total Price</label>
+            {{ form.price }}
+            {% for error in form.price.errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          </div>
+          <div class="form-group">
+            <label>Remark</label>
+            {{ form.remark }}
+            {% for error in form.remark.errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          </div>
+          <br>
+          {% if form.errors %}
+            {% for error in form.non_field_errors %}
+              <div class="alert alert-danger">
+                <strong>{{ error|escape }}</strong>
+              </div>
+            {% endfor %}
+          {% endif %}
+          <br>
+
+          <div class="d-flex justify-content-space">
+            <div>
+              <button onclick="window.location.href = '/dashboard/order/list'" type="button" class="btn">Back</button>
+              <button id="btn-submit" type="submit" class="btn btn-primary">Submit</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  $(document).ready(function() {
+    bindTimeSlotDeleteEvent()
+    // disabled mousewheel
+    $('#id_date').on('mousewheel', function(e) {
+      e.preventDefault()
+      return false
+    })
+    $('.datepicker').datetimepicker({
+      timepicker: false,
+      format:'Y-m-d',
+      theme: 'dark',
+      onShow: function(ct) {
+      }
+    });
+    $('.timepicker').datetimepicker({
+      datepicker: false,
+      format: 'H:i',
+      step: 30,
+      theme: 'dark',
+      onSelectTime: function(time) {
+        const newTimeStr = `${time.getHours()}:${('0'+time.getMinutes()).slice(-2)}`
+        $('.timepicker').val(null).blur()
+        if ($('#id_time_list').val().includes(newTimeStr)) return
+
+        // update time slot list
+        const timeAfter = new Date(time.getTime() + (30 * 60 * 1000))
+        const timeAfterStr = `${timeAfter.getHours()}:${('0'+timeAfter.getMinutes()).slice(-2)}`
+        $('#time-slot-list').append(`<div class="time-slot-tag d-flex" style="color: #e0e0e0;border: 1px solid #e0e0e0;padding: 3px 6px;margin-bottom:2px;margin-right: 12px;"><div>${newTimeStr} - ${timeAfterStr}</div><div class="delete-time-slot" data-time="${newTimeStr}"></div>`)
+        bindTimeSlotDeleteEvent()
+        // update form value
+        $('#id_time_list').val(function(index, value) {
+          const valueObj = JSON.parse(value.replace(/'/g, '"'))
+          valueObj.push(newTimeStr)
+          return JSON.stringify(valueObj)
+        })
+      }
+    });
+    // debounce
+    $('#form').submit(function() {
+      $('#btn-submit').prop('disabled', true);
+      // append status data to form
+      const status = $("#id_status option:selected").val()
+      $("<input />").attr("type", "hidden")
+        .attr("name", "status")
+        .attr("value", status)
+        .appendTo("#form");
+    })
+  });
+
+  function bindTimeSlotDeleteEvent() {
+    $('.delete-time-slot').click(function() {
+      const time = $(this).data("time")
+      $('#id_time_list').val(function(index, value) {
+        const valueObj = JSON.parse(value.replace(/'/g, '"'))
+        const newValueObj = valueObj.filter(function(v) {
+          return v != time
+        })
+        return JSON.stringify(newValueObj)
+      })
+      $(this).parent().remove()
+    })
+  }
+</script>
+{% endblock javascripts %}

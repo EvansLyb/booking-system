@@ -166,7 +166,8 @@ def create_order(request):
             time_obj = datetime.datetime.strptime(time_str, '%H:%M')
             freeze = Freeze.objects.filter(facility_id=facility_id, date=date, time=datetime.time(hour=time_obj.hour, minute=time_obj.minute)).first()
             if freeze:
-                if freeze.weights >= 1:
+                new_freeze_weights = freeze.weights + get_freeze_weights_by_court_type(court_type)
+                if new_freeze_weights > 1:
                     raise Exception('Already sold out. facility_id={}, date={}, time={}, court_type={}'.format(facility_id, date, time_str, court_type))
                 if freeze.is_lock and freeze.lock_count > 0:
                     raise Exception('Locked')
@@ -220,6 +221,7 @@ def create_order(request):
                 order_no=generate_order_no(),
                 facility_id=facility_id,
                 user_id=user.id,
+                phone_number=user.phone_number,
                 status=OrderStatus.PENDING_CONFIRMATION,
                 date=datetime.datetime.strptime(date, '%Y-%m-%d'),
                 court_type=court_type,
@@ -238,6 +240,7 @@ def create_order(request):
                 order_no=generate_order_no(),
                 facility_id=facility_id,
                 user_id=user.id,
+                phone_number=user.phone_number,
                 status=OrderStatus.PENDING_PAYMENT,
                 date=datetime.datetime.strptime(date, '%Y-%m-%d'),
                 court_type=court_type,
@@ -345,10 +348,8 @@ def get_order_details(request, oid=None):
         resp["stadium_latitude"] = stadium.latitude
         resp["stadium_longitude"] = stadium.longitude
 
-        user = User.objects.filter(id=order.user_id).first()
-        resp["phone_number"] = user.phone_number
-
         resp["order_no"] = order.order_no
+        resp["phone_number"] = order.phone_number
         resp["status"] = order.status
         resp["date"] = order.date
         resp["court_type"] = order.court_type

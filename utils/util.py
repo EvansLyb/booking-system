@@ -37,8 +37,17 @@ def trans_time_to_slot(time_str):
 
 
 """
-- time_list: ["08:30", "12:00", "19:00"]
-- output: ["08:30 - 09:00", "12:00 - 12:30", "19:00 - 19:30"]
+- time_list_str: '["08:30", "12:00", "19:00"]'
+- output: ["08:30", "12:00", "19:00"]
+"""
+def trans_list_str_to_list(list_str):
+    list_str_copy = (list_str + '.')[:-1]
+    return literal_eval(list_str_copy)
+
+
+"""
+- time_list: '["08:30", "12:00", "19:00"]'
+- output: '["08:30 - 09:00", "12:00 - 12:30", "19:00 - 19:30"]'
 """
 def format_order_time_list(time_list):
-    return [trans_time_to_slot(time_str) for time_str in literal_eval(time_list)]
+    return [trans_time_to_slot(time_str) for time_str in trans_list_str_to_list(time_list)]

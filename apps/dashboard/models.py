@@ -100,6 +100,7 @@ class Order(models.Model):
     order_no = models.CharField('order_no', max_length=64, null=False)
     facility_id = models.BigIntegerField('facility_id', blank=False)
     user_id = models.BigIntegerField('user_id', blank=False, null=False)
+    phone_number = models.CharField('phone_number', max_length=32, default='')
     status = models.CharField(max_length=255, choices=OrderStatus.choices, default=OrderStatus.PENDING_PAYMENT)
     date = models.DateField('date')
     court_type = models.CharField(max_length=255, choices=CourtType.choices, null=False)
@@ -114,10 +115,6 @@ class Order(models.Model):
     def facility_name(self):
         facility_name = Facility.objects.get(id=self.facility_id).name
         return facility_name
-
-    @property
-    def phone_number(self):
-        return User.objects.get(id=self.user_id).phone_number
 
 
 class BillType(models.TextChoices):

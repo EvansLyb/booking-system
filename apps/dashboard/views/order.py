@@ -21,9 +21,10 @@ import requests
 import json
 import datetime
 
-from apps.dashboard.models import Order, Facility, Bill, OrderStatus
+from apps.dashboard.models import Order, Facility, Bill, OrderStatus, Freeze
 from apps.apis.models import User
-from apps.dashboard.forms.order import OrderFilterForm
+from apps.dashboard.forms.order import OrderForm
+from utils import util
 
 
 NUMBER_OF_PAGE = 25
@@ -53,9 +54,7 @@ class OrderListView(LoginRequiredMixin, View):
             query_to_date_obj = datetime.datetime.strptime(query_to_date, '%Y-%m-%d')
             query.add(Q(date__lte=query_to_date_obj), Q.AND)
         if phone_number:
-            user = User.objects.filter(phone_number=phone_number).first()
-            user_id = user.id if user else None
-            query.add(Q(user_id=user_id), Q.AND)
+            query.add(Q(phone_number=phone_number), Q.AND)
         if len(query_status_list) > 0:
             query1 = Q()
             for query_status in query_status_list:
@@ -121,3 +120,151 @@ class OrderStatusView(LoginRequiredMixin, View):
         order.save()
         return JsonResponse({}, safe=False, status=201)
 
+
+class OrderView(LoginRequiredMixin, View):
+    login_url = '/login'
+    redirect_field_name = 'redirect_to'
+
+    def get(self, request, order_no=None):
+        if not order_no:
+            raise Http404
+
+        order = Order.objects.filter(order_no=order_no).first()
+        if not order:
+            raise Http404
+
+        order_status_selector = OrderStatus.choices
+        current_order_status = order.status
+
+        form = OrderForm(request.POST or None, instance=order)
+        html_template = loader.get_template('dashboard/order-form.html')
+        return HttpResponse(html_template.render({
+            "form": form,
+            "order_status_selector": order_status_selector,
+            "current_order_status": current_order_status,
+        }, request))
+
+    def _check_if_time_available(self, time_str, facility_id, date, court_type, is_only_court_type_changed = False, old_court_type = None):
+        time_obj = datetime.datetime.strptime(time_str, '%H:%M')
+        freeze = Freeze.objects.filter(facility_id=facility_id, date=date, time=datetime.time(hour=time_obj.hour, minute=time_obj.minute)).first()
+        if freeze:
+            new_freeze_weights = freeze.weights - util.get_freeze_weights_by_court_type(old_court_type) + util.get_freeze_weights_by_court_type(court_type) if is_only_court_type_changed else freeze.weights + util.get_freeze_weights_by_court_type(court_type)
+            if new_freeze_weights > 1:
+                return '{} {} is not available'.format(date, time_str)
+            elif freeze.is_lock and freeze.lock_count > 0:
+                return '{} {} is locked'.format(date, time_str)
+        return None
+
+    def _unfreeze(self, facility_id, date, time_list, court_type):
+        for time_str in time_list:
+            time_obj = datetime.datetime.strptime(time_str, '%H:%M')
+            freeze = Freeze.objects.filter(facility_id=facility_id, date=date, time=datetime.time(hour=time_obj.hour, minute=time_obj.minute)).first()
+            new_freeze_weights = freeze.weights - util.get_freeze_weights_by_court_type(court_type)
+            freeze.is_order = True if new_freeze_weights > 0 else False
+            freeze.weights = new_freeze_weights
+            freeze.save()
+
+    def _freeze(self, facility_id, date, time_list, court_type):
+        for time_str in time_list:
+            time_obj = datetime.datetime.strptime(time_str, '%H:%M')
+            freeze = Freeze.objects.filter(facility_id=facility_id, date=date, time=datetime.time(hour=time_obj.hour, minute=time_obj.minute)).first()
+            if freeze:
+                freeze.is_order = True
+                freeze.weights = freeze.weights + util.get_freeze_weights_by_court_type(court_type)
+            else:
+                freeze = Freeze(
+                    facility_id=facility_id,
+                    date=date,
+                    time=datetime.time(hour=time_obj.hour, minute=time_obj.minute),
+                    is_order=True,
+                    weights=util.get_freeze_weights_by_court_type(court_type)
+                )
+            freeze.save()
+
+    def post(self, request, order_no=None):
+        if not order_no:
+            raise Http404
+
+        order = Order.objects.filter(order_no=order_no).first()
+        if not order:
+            raise Http404
+
+        order_status_selector = OrderStatus.choices
+        current_order_status = order.status
+        html_template = loader.get_template('dashboard/order-form.html')
+
+        form = OrderForm(request.POST or None)
+        if form.is_valid():
+            phone_number = form.cleaned_data.get('phone_number')
+            facility_id = int(form.cleaned_data.get('facility_id'))
+            date = form.cleaned_data.get('date')
+            court_type = form.cleaned_data.get('court_type')
+            time_list_str = form.cleaned_data.get('time_list')
+            time_list = util.trans_list_str_to_list(time_list_str)
+            status = form.cleaned_data.get('status')
+            remark = form.cleaned_data.get('remark')
+
+            # check time_list
+            if (len(time_list) < 1):
+                form.add_error('time_list', 'At least one')
+                return HttpResponse(html_template.render({
+                    "form": form,
+                    "order_status_selector": order_status_selector,
+                    "current_order_status": current_order_status,
+                }, request))
+
+            facility_changed = facility_id != order.facility_id
+            date_changed = date != order.date
+            court_type_changed = court_type != order.court_type
+            time_list_changed = time_list != order.time_list
+            if facility_changed or date_changed or court_type_changed or time_list_changed:
+                """ === data check === """
+                if facility_changed or date_changed:
+                    for time_str in time_list:
+                        error_msg = self._check_if_time_available(time_str, facility_id, date, court_type)
+                        if error_msg:
+                            form.add_error(None, error_msg)
+                else:
+                    for time_str in time_list:
+                        is_new_time = time_str not in util.trans_list_str_to_list(order.time_list)
+                        if is_new_time:
+                            error_msg = self._check_if_time_available(time_str, facility_id, date, court_type)
+                            if error_msg:
+                                form.add_error(None, error_msg)
+                        else:
+                            if court_type_changed:
+                                error_msg = self._check_if_time_available(time_str, facility_id, date, court_type, is_only_court_type_changed=True, old_court_type=order.court_type)
+                                if error_msg:
+                                    form.add_error(None, error_msg)
+                            else:
+                                # nothing changed
+                                pass
+                if form.non_field_errors():
+                    return HttpResponse(html_template.render({
+                        "form": form,
+                        "order_status_selector": order_status_selector,
+                        "current_order_status": current_order_status,
+                    }, request))
+
+                """ === data unfreeze === """
+                self._unfreeze(order.facility_id, order.date, util.trans_list_str_to_list(order.time_list), order.court_type)
+                """ === data freeze === """
+                self._freeze(facility_id, date, time_list, court_type)
+
+            """ === update order === """
+            order.facility_id = facility_id
+            order.phone_number = phone_number
+            order.date = date
+            order.court_type = court_type
+            order.time_list = time_list_str
+            order.status = status
+            order.remark = remark
+            order.save()
+
+            return redirect("/dashboard/order/list")
+
+        return HttpResponse(html_template.render({
+            "form": form,
+            "order_status_selector": order_status_selector,
+            "current_order_status": current_order_status,
+        }, request))
