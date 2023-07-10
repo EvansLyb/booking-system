@@ -5,7 +5,7 @@ Copyright (c) 2019 - present Kyle
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.serializers import serialize
-from django.db.models import Q
+from django.db import transaction
 from django.conf import settings
 
 import json
@@ -159,6 +159,7 @@ def get_freeze(request):
         return JsonResponse(resp, safe=False)
 
 
+@transaction.atomic
 def create_order(request):
     def _freeze(facility_id, date, time_list, court_type):
         # data check
