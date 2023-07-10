@@ -1,7 +1,7 @@
 from apps.dashboard.models import Order, Bill, BillType
 
 
-def calc_checkout_price(order_id, order = None, bills = None):
+def calc_checkout_price(order_id, order = None, bills = None) -> float:
     if not order:
         order = Order.objects.filter(id=order_id).first()
     if not bills:
@@ -17,4 +17,4 @@ def calc_checkout_price(order_id, order = None, bills = None):
             accumulative_total_amount -= bill.amount
 
     checkout_price = order_price - accumulative_total_amount
-    return checkout_price
+    return float(checkout_price)
