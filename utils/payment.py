@@ -15,7 +15,7 @@ def unified_order(open_id, out_trade_no, total_price, ip):
         "spbill_create_ip": ip,
         "env_id": settings.CLOUD_ENV,
         "sub_mch_id": settings.MCH_ID,
-        "total_fee": total_price * 100,
+        "total_fee": int(total_price * 100),
         "callback_type": 2,
         "container": {
            "service": settings.SERVICE,
