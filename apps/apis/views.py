@@ -382,6 +382,7 @@ def get_order_details(request, oid=None):
         resp["date"] = order.date
         resp["court_type"] = order.court_type
         resp["price"] = order.price
+        resp["checkout_price"] = calc_checkout_price(oid, order)
         resp["created_at"] = order.created_at
         resp["updated_at"] = order.updated_at
         resp["remark"] = order.remark
