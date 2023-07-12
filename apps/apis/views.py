@@ -19,7 +19,7 @@ from apps.apis.models import User
 from utils.payment import unified_order
 from utils.sms import send_sms
 from utils.util import get_freeze_weights_by_court_type, generate_order_no, generate_trade_no, get_order_no_by_trade_no
-from utils.order import calc_checkout_price
+from utils.order import calc_unpay_amount
 
 
 def get_facility_list(request):
@@ -271,9 +271,9 @@ def checkout(request):
             return JsonResponse({"errcode": 1, "errmsg": "Invalid Order ID"}, safe=False, status=400)
 
         trade_no = generate_trade_no(order.order_no)
-        total_price = calc_checkout_price(order_id, order)
+        total_price = calc_unpay_amount(order_id, order)
         ip = request.headers.get('X-Original-Forwarded-For', '127.0.0.1')
-        resp = unified_order(open_id=open_id, out_trade_no=trade_no, total_price=total_price, ip=ip)
+        resp = unified_order(open_id=open_id, trade_no=trade_no, total_price=total_price, ip=ip)
         resp_data = resp.get('respdata', {})
         payment_data = resp_data.get('payment', {})
         payment_data["errcode"] = 0
@@ -305,6 +305,43 @@ def payment_callback(request):
         order_id=order.id,
         bill_type=BillType.PAYMENT,
         amount=amount,
+        trade_no=trade_no,
+        nonce_str=nonce_str,
+        transaction_id=transaction_id
+    )
+
+    return JsonResponse({
+        "errcode": 0,
+        "errmsg": ""
+    }, safe=False, status=200)
+
+
+def refund_callback(request):
+    json_data = json.loads(request.body)
+    print("refund_callback:")
+    print(json_data)
+    transaction_id = json_data.get("transactionId", None)
+    trade_no = json_data.get("outTradeNo", None)
+    price = json_data.get("refundFee", None)
+    nonce_str = json_data.get("nonceStr", None)
+    if transaction_id == None or trade_no == None or price == None or nonce_str == None:
+        return JsonResponse({
+            "errcode": 1,
+            "errmsg": ""
+        }, safe=False, status=400)
+
+    refunded_amount = Decimal(price) / 100
+    # Update Payment Bill
+    payment_bill = Bill.objects.filter(trade_no=trade_no).first()
+    payment_bill.refunded_amount = refunded_amount
+    payment_bill.save()
+    # Create Refund Bill
+    order_no = get_order_no_by_trade_no(trade_no)
+    order = Order.objects.filter(order_no=order_no).first()
+    Bill.objects.create(
+        order_id=order.id,
+        bill_type=BillType.REFUND,
+        amount=refunded_amount,
         trade_no=trade_no,
         nonce_str=nonce_str,
         transaction_id=transaction_id
@@ -382,7 +419,7 @@ def get_order_details(request, oid=None):
         resp["date"] = order.date
         resp["court_type"] = order.court_type
         resp["price"] = order.price
-        resp["checkout_price"] = calc_checkout_price(oid, order)
+        resp["checkout_price"] = calc_unpay_amount(oid, order)
         resp["created_at"] = order.created_at
         resp["updated_at"] = order.updated_at
         resp["remark"] = order.remark

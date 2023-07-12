@@ -8,7 +8,7 @@ from django.views.generic.list import ListView
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.db.models.expressions import RawSQL
-from django.db import connection
+from django.db import transaction
 from django.db.models import Sum, Q
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse, Http404
@@ -20,11 +20,14 @@ import uuid
 import requests
 import json
 import datetime
+from decimal import Decimal
 
-from apps.dashboard.models import Order, Facility, Bill, OrderStatus, Freeze
+from apps.dashboard.models import Order, Facility, Bill, BillType, OrderStatus, Freeze
 from apps.apis.models import User
 from apps.dashboard.forms.order import OrderForm
 from utils import util
+from utils.payment import refund
+from utils.order import calc_unpay_amount
 
 
 NUMBER_OF_PAGE = 25
@@ -289,5 +292,36 @@ def update_order_price(request, order_no=None):
             resp['errcode'] = 1
             resp['errmsg'] = "Wrong price"
             return JsonResponse(resp, safe=False)
-
-        return JsonResponse(resp, safe=False)
+        
+        new_price = Decimal(new_price)
+        if new_price > order.price:
+            order.price = new_price
+            order.status = OrderStatus.PENDING_PAYMENT
+            order.save()
+            # TODO: send sms
+        elif new_price < order.price:
+            bills = Bill.objects.filter(order_id=order.id)
+            unpay_amount = calc_unpay_amount(order.id, order, bills)
+            if unpay_amount >= order.price - new_price:
+                order.price = new_price
+                order.save()
+            else:
+                refund_amount = order.price - new_price + unpay_amount
+                for bill in bills:
+                    refunded_amount = bill.refunded_amount or Decimal(0)
+                    if refund_amount > Decimal(0) and bill.bill_type == BillType.PAYMENT and (bill.amount - refunded_amount > Decimal(0)):
+                        available_refund_amount = bill.amount - refunded_amount
+                        refund_no = util.generate_refund_no(bill.trade_no)
+                        if available_refund_amount >= refund_amount:
+                            refund(bill.trade_no, refund_no, bill.amount, refund_amount)
+                            bill.refunded_amount = refunded_amount + refund_amount
+                            bill.save()
+                            refund_amount = Decimal(0)
+                        else:
+                            refund(bill.trade_no, refund_no, bill.amount, available_refund_amount)
+                            bill.refunded_amount = bill.amount
+                            bill.save()
+                            refund_amount -= available_refund_amount
+                order.price = new_price
+                order.save()
+        return JsonResponse(resp, safe=False, status=201)

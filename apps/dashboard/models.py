@@ -127,5 +127,6 @@ class Bill(models.Model):
     bill_type = models.CharField(max_length=64, choices=BillType.choices, default=BillType.PAYMENT)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0), null=False)
+    refunded_amount = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0), null=True)
     transaction_id = models.CharField(max_length=1024, null=True)
     nonce_str = models.CharField(max_length=1024, null=False)

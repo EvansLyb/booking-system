@@ -41,7 +41,7 @@
           </div>
           <div>
             <label>Time</label>
-            <div style="font-size: 0.6rem;text-align: center;white-space:nowrap;display: flex;">
+            <div style="font-size: 0.6rem;text-align: center;white-space:nowrap;display: flex;flex-wrap:wrap;">
               {% for time_slot in order.time_list|format_order_time_list %}
               <div style="color: #e0e0e0;border: 1px solid #e0e0e0;padding: 3px 6px;margin-bottom:2px;margin-right: 12px;">{{time_slot}}</div>
               {% endfor %}

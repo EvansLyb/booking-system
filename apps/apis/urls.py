@@ -15,6 +15,7 @@ from .views import (
     create_order,
     checkout,
     payment_callback,
+    refund_callback,
     get_order_list,
     get_order_details,
     t_send_sms
@@ -30,6 +31,7 @@ urlpatterns = [
     path('/create-order', create_order),
     path('/checkout', checkout),
     path('/pay/callback', payment_callback),
+    path('/refund/callback', refund_callback),
     path('/order-list', get_order_list),
     path('/order/<int:oid>', get_order_details),
     path('/send_sms', t_send_sms),
