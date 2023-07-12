@@ -304,6 +304,8 @@ def update_order_price(request, order_no=None):
             unpay_amount = calc_unpay_amount(order.id, order, bills)
             if unpay_amount >= order.price - new_price:
                 order.price = new_price
+                if (unpay_amount == Decimal(0)):
+                    order.status = OrderStatus.PENDING_CONFIRMATION
                 order.save()
             else:
                 refund_amount = order.price - new_price + unpay_amount

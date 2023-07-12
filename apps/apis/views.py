@@ -331,10 +331,6 @@ def refund_callback(request):
         }, safe=False, status=400)
 
     refunded_amount = Decimal(price) / 100
-    # Update Payment Bill
-    payment_bill = Bill.objects.filter(trade_no=trade_no).first()
-    payment_bill.refunded_amount = refunded_amount
-    payment_bill.save()
     # Create Refund Bill
     order_no = get_order_no_by_trade_no(trade_no)
     order = Order.objects.filter(order_no=order_no).first()

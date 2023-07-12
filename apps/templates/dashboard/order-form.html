@@ -141,10 +141,30 @@
               <button id="btn-submit" type="submit" class="btn btn-primary">Submit</button>
             </div>
             <div>
-              <button id="btn-update-price" type="button" class="btn btn-primary" data-order_no="{{form.order_no.value}}">Update Price</button>
+              <button type="button" rel="tooltip" class="btn btn-primary" data-toggle="modal" data-target="#updatePriceModal">Update Price</button>
             </div>
           </div>
         </form>
+      </div>
+    </div>
+    <!-- Form Modal - Update Price -->
+    <div class="modal fade modal-black" id="updatePriceModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">New Price</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+              <i class="tim-icons icon-simple-remove"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <input id="id-new-price" name="new_price" style="margin-top: 6px;" type="text" class="form-control price-input" maxlength="10" autocomplete="off">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button id="btn-update-price" type="button" class="btn btn-primary" data-order_no="{{form.order_no.value}}">Update</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -160,6 +180,13 @@
     $('#id_date').on('mousewheel', function(e) {
       e.preventDefault()
       return false
+    })
+    // format price input
+    $('.price-input').on('input propertychange', function() {
+      this.value=this.value.toString().match(/^\d+(?:\.\d{0,2})?/);
+      if (this.value.indexOf('.') < 0 && this.value != '') {
+        this.value = parseFloat(this.value);
+      }
     })
     $('.datepicker').datetimepicker({
       timepicker: false,
@@ -192,21 +219,23 @@
       }
     });
     $('#btn-update-price').click(function() {
-      console.log('???')
+      if (!$('#id-new-price').val()) return
       const orderNo = $(this).data("order_no")
+      $('#btn-update-price').prop('disabled', true);
       fetch(`/dashboard/order/${orderNo}/update-price`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          new_price: '0.03'
+          new_price: $('#id-new-price').val()
         }),
       }).then(function(res) {
         if (res.ok) {
           location.reload()
         } else {
           $("#errmsg").css({ display: "block" })
+          $('#id-new-price').val('')
         }
       })
     })
