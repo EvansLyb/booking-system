@@ -108,7 +108,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now_add=True, null=True)
     remark = models.CharField(max_length=2048, null=True, blank=True)
-    time_list = models.CharField(max_length=2048, null=False)  # ["08:30", "12:00", "19:00"]
+    time_list = models.CharField(max_length=2048, null=False)  # '["08:30", "12:00", "19:00"]'
     is_full_day = models.BooleanField(default=False)
 
     @property

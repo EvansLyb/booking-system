@@ -89,7 +89,7 @@
                 <tbody>
                   {% for order in order_list %}
                   <tr>
-                    <td><a href="/dashboard/order/{{ order.order_no }}/details">{{ order.order_no }}</a></td>
+                    <td><a href="/dashboard/order/{{ order.order_no }}">{{ order.order_no }}</a></td>
                     <td>{{ order.phone_number }}</td>
                     <td>{{ order.facility_name }}</td>
                     <td>{{ order.date|date:"Y-m-d" }}</td>
@@ -117,9 +117,6 @@
                     <td>{{ order.remark }}</td>
                     <td>{{ order.price }}</td>
                     <td class="td-actions text-center">
-                      <button type="button" rel="tooltip" class="btn btn-primary btn-link btn-icon btn-sm btn-details" data-order_no="{{ order.order_no }}" data-toggle="tooltip" data-placement="top" title="Details">
-                        <i class="tim-icons icon-zoom-split"></i>
-                      </button>
                       <button type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-order_no="{{ order.order_no }}" data-toggle="tooltip" data-placement="top" title="Edit">
                         <i class="tim-icons icon-settings"></i>
                       </button>
@@ -158,10 +155,26 @@
 {% block javascripts %}
 <script>
   $(document).ready(function() {
-    $(".btn-details").on("click", function() {
-      var order_no = $(this).data("order_no")
-      window.location.href = "/dashboard/order/" + order_no + "/details"
-    })
+    $('.fromdatepicker').datetimepicker({
+      timepicker: false,
+      format:'Y-m-d',
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          maxDate: $('.todatepicker').val() ? $('.todatepicker').val() : false
+        })
+      }
+    });
+    $('.todatepicker').datetimepicker({
+      timepicker: false,
+      format:'Y-m-d',
+      theme: 'dark',
+      onShow: function(ct) {
+        this.setOptions({
+          minDate: $('.fromdatepicker').val() ? $('.fromdatepicker').val() : false
+        })
+      }
+    });
     $(".btn-edit").on("click", function() {
       var order_no = $(this).data("order_no")
       window.location.href = "/dashboard/order/" + order_no

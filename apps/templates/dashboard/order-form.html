@@ -13,6 +13,14 @@
     padding-right: 3px;
     transform: scale(2);
   }
+  .form-group {
+    width: 180px;
+    min-width: fit-content;
+  }
+  .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+    color: #fff;
+    opacity: .45;
+  }
 </style>
 {% endblock stylesheets %}
 
@@ -22,149 +30,160 @@
 {% block content %}
   <div class="content">
     <div class="card">
+      <div class="card-header">
+        Basic Info
+      </div>
       <div class="card-body">
-        <form id="form" role="form" method="post" action="">
-          <div class="form-group">
-            <label>Order ID</label>
-            {{ form.order_no }}
-            {% for error in form.order_no.errors %}
-              <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-              </div>
-            {% endfor %}
-          </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            {{ form.phone_number }}
-            {% for error in form.phone_number.errors %}
-              <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-              </div>
-            {% endfor %}
-          </div>
-          <div class="form-group">
-            <label>Facility</label>
-            {{ form.facility_id }}
-            {% for error in form.facility_id.errors %}
-              <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-              </div>
-            {% endfor %}
-          </div>
-          <div class="form-group">
-            <label>Date</label>
-            {{ form.date }}
-            {% for error in form.date.errors %}
-              <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-              </div>
-            {% endfor %}
-          </div>
-          <div class="form-group">
-            <label>Court Type</label>
-            {{ form.court_type }}
-            {% for error in form.court_type.errors %}
-              <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-              </div>
-            {% endfor %}
-          </div>
-          <div class="form-group">
-            <label>Time</label>
-            <div id="time-slot-list" style="font-size: 0.6rem;text-align: center;white-space:nowrap;display: flex; flex-wrap: wrap;">
-              {% for time in form.time_list.value|format_order_time_list %}
-              <div
-                class="time-slot-tag d-flex"
-                style="color: #e0e0e0;border: 1px solid #e0e0e0;padding: 3px 6px;margin-bottom:2px;margin-right: 12px;"
-              >
-                <div>{{time|format_order_time_to_slot}}</div>
-                <div class="delete-time-slot" data-time="{{time}}"></div>
-              </div>
+        <blockquote class="blockquote mb-0">
+          <form id="form" role="form" method="post" action="" onsubmit="return false">
+            <div class="form-group">
+              <label>Order ID</label>
+              {{ form.order_no }}
+              {% for error in form.order_no.errors %}
+                <div class="alert alert-danger">
+                  <strong>{{ error|escape }}</strong>
+                </div>
               {% endfor %}
             </div>
-            <input style="margin-top: 6px;" type="text" class="form-control timepicker" autocomplete="off">
-            {{ form.time_list.as_hidden }}
-            {% for error in form.time_list.errors %}
-              <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <div class="d-flex">
+                {{ form.phone_number }}
+                <button id="btn-edit-phone-number" type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-toggle="tooltip" data-placement="top" title="Edit">
+                  <i class="tim-icons icon-settings"></i>
+                </button>
               </div>
-            {% endfor %}
-          </div>
-          <div class="form-group">
-            <label>Order Status</label>
-            <select id="id_status" class="form-control" {% if current_order_status == 'Pending Payment' %}disabled{% endif %}>
-              {% for order_status in order_status_selector %}
-              <option
-                value="{{order_status.0}}"
-                {% if order_status.0 == 'Pending Payment' %}disabled{% endif %}
-                {% if order_status.0 == current_order_status %}selected{% endif %}
-              >{{order_status.0}}</option>
+              <div id="err-msg-phone-number" class="alert alert-danger" style="display:none;margin-top:10px;padding:6px 20px;font-size:14px;"></div>
+            </div>
+            <div class="form-group">
+              <label>Facility</label>
+              <div class="d-flex">
+                {{ form.facility_id }}
+                <button id="btn-edit-facility" type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-toggle="tooltip" data-placement="top" title="Edit">
+                  <i class="tim-icons icon-settings"></i>
+                </button>
+              </div>
+              <div id="err-msg-facility" class="alert alert-danger" style="display:none;margin-top:10px;padding:6px 20px;font-size:14px;"></div>
+            </div>
+            <div class="form-group">
+              <label>Date</label>
+              <div class="d-flex">
+                {{ form.date }}
+                <button id="btn-edit-date" type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-toggle="tooltip" data-placement="top" title="Edit">
+                  <i class="tim-icons icon-settings"></i>
+                </button>
+              </div>
+              <div id="err-msg-date" class="alert alert-danger" style="display:none;margin-top:10px;padding:6px 20px;font-size:14px;"></div>
+            </div>
+            <div class="form-group">
+              <label>Court Type</label>
+              <div class="d-flex">
+                {{ form.court_type }}
+                <button id="btn-edit-court-type" type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-toggle="tooltip" data-placement="top" title="Edit">
+                  <i class="tim-icons icon-settings"></i>
+                </button>
+              </div>
+              <div id="err-msg-court-type" class="alert alert-danger" style="display:none;margin-top:10px;padding:6px 20px;font-size:14px;"></div>
+            </div>
+            <div class="form-group">
+              <label>Time</label>
+              <div id="time-slot-list" style="font-size: 0.6rem;text-align: center;white-space:nowrap;display: flex; flex-wrap: wrap;">
+                {% for time in form.time_list.value|format_order_time_list %}
+                <div
+                  class="time-slot-tag d-flex"
+                  style="color: #e0e0e0;border: 1px solid #e0e0e0;padding: 3px 6px;margin-bottom:2px;margin-right: 12px;"
+                >
+                  <div>{{time|format_order_time_to_slot}}</div>
+                  <div class="delete-time-slot" style="display: none;" data-time="{{time}}"></div>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="d-flex items-center">
+                <input id="id-time-input" style="margin-top: 6px;" type="text" class="form-control timepicker" autocomplete="off" disabled>
+                <button id="btn-edit-time" type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-toggle="tooltip" data-placement="top" title="Edit">
+                  <i class="tim-icons icon-settings"></i>
+                </button>
+              </div>
+              {{ form.time_list.as_hidden }}
+              <div id="err-msg-time" class="alert alert-danger" style="display:none;margin-top:10px;padding:6px 20px;font-size:14px;"></div>
+            </div>
+            <div class="form-group">
+              <label>Order Status</label>
+              <div class="d-flex">
+                <select id="id_status" class="form-control" disabled>
+                  {% for order_status in order_status_selector %}
+                  <option
+                    value="{{order_status.0}}"
+                    {% if order_status.0 == 'Pending Payment' %}disabled{% endif %}
+                    {% if order_status.0 == current_order_status %}selected{% endif %}
+                  >{{order_status.0}}</option>
+                  {% endfor %}
+                </select>
+                {% if current_order_status != 'Pending Payment' %}
+                <button id="btn-edit-status" type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-toggle="tooltip" data-placement="top" title="Edit">
+                  <i class="tim-icons icon-settings"></i>
+                </button>
+                {% endif %}
+              </div>
+              <div id="err-msg-status" class="alert alert-danger" style="display:none;margin-top:10px;padding:6px 20px;font-size:14px;"></div>
+            </div>
+            <div class="form-group">
+              <label>Total Price</label>
+              <div class="d-flex">
+                {{ form.price }}
+                <button id="btn-edit-price" type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-toggle="tooltip" data-placement="top" title="Edit">
+                  <i class="tim-icons icon-settings"></i>
+                </button>
+              </div>
+              <div id="err-msg-price" class="alert alert-danger" style="display:none;margin-top:10px;padding:6px 20px;font-size:14px;"></div>
+            </div>
+            <div class="form-group">
+              <label>Remark</label>
+              <div class="d-flex">
+                {{ form.remark }}
+                <button id="btn-edit-remark" type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-toggle="tooltip" data-placement="top" title="Edit">
+                  <i class="tim-icons icon-settings"></i>
+                </button>
+              </div>
+              <div id="err-msg-remark" class="alert alert-danger" style="display:none;margin-top:10px;padding:6px 20px;font-size:14px;"></div>
+            </div>
+            {% if form.errors %}
+              <br>
+              {% for error in form.non_field_errors %}
+                <div class="alert alert-danger">
+                  <strong>{{ error|escape }}</strong>
+                </div>
               {% endfor %}
-            </select>
-            {% for error in form.status.errors %}
-              <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-              </div>
-            {% endfor %}
+              <br>
+            {% endif %}
+          </form>
+        </blockquote>
+      </div>
+      <div class="card-header">
+        Bills
+      </div>
+      <div class="card-body">
+        {% for bill in bill_list %}
+        <blockquote class="blockquote mb-0">
+          <div>
+            <label>Bill Type</label>
+            <p>{{bill.bill_type}}</p>
           </div>
-          <div class="form-group">
-            <label>Total Price</label>
-            {{ form.price }}
-            {% for error in form.price.errors %}
-              <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-              </div>
-            {% endfor %}
+          <div>
+            <label>Amount</label>
+            <p>{{bill.amount}}</p>
           </div>
-          <div class="form-group">
-            <label>Remark</label>
-            {{ form.remark }}
-            {% for error in form.remark.errors %}
-              <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-              </div>
-            {% endfor %}
+          <div>
+            <label>Created At</label>
+            <p>{{bill.created_at|date:"Y-m-d"}} {{bill.created_at|date:"H:i:s"}}</p>
           </div>
-          <br>
-          {% if form.errors %}
-            {% for error in form.non_field_errors %}
-              <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-              </div>
-            {% endfor %}
-          {% endif %}
-          <br>
-
-          <div class="d-flex justify-content-between">
-            <div>
-              <button onclick="window.location.href = '/dashboard/order/list'" type="button" class="btn">Back</button>
-              <button id="btn-submit" type="submit" class="btn btn-primary">Submit</button>
-            </div>
-            <div>
-              <button type="button" rel="tooltip" class="btn btn-primary" data-toggle="modal" data-target="#updatePriceModal">Update Price</button>
-            </div>
-          </div>
-        </form>
+        </blockquote>
+        {% endfor %}
       </div>
     </div>
-    <!-- Form Modal - Update Price -->
-    <div class="modal fade modal-black" id="updatePriceModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">New Price</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-              <i class="tim-icons icon-simple-remove"></i>
-            </button>
-          </div>
-          <div class="modal-body">
-            <input id="id-new-price" name="new_price" style="margin-top: 6px;" type="text" class="form-control price-input" maxlength="10" autocomplete="off">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button id="btn-update-price" type="button" class="btn btn-primary" data-order_no="{{form.order_no.value}}">Update</button>
-          </div>
-        </div>
+    <div class="d-flex justify-content-between">
+      <div>
+        <button onclick="window.location.href = '/dashboard/order/list'" type="button" class="btn">Back</button>
       </div>
     </div>
   </div>
@@ -188,6 +207,290 @@
         this.value = parseFloat(this.value);
       }
     })
+    // btn edit
+    $('#btn-edit-phone-number').click(function() {
+      const isEditing = $(this).data('editing') || false
+      const isLoading = $(this).data('loading')
+      if (isLoading) return
+      if (isEditing) {
+        $('#id_phone_number').prop('disabled', true)
+        $(this).find('i').removeClass('icon-check-2').addClass('icon-settings').css('color', '#00f2c3')
+        $(this).data('editing', false)
+        // update phone number
+        if (!$('#id_phone_number').val()) return
+        const orderNo = getOrderNo()
+        $(this).data('loading', true)
+        fetch(`/dashboard/order/${orderNo}/update-phone-number`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            new_phone_number: $('#id_phone_number').val()
+          }),
+        }).then(function(res) {
+          $('#btn-edit-phone-number').data('loading', false)
+          if (res.ok) {
+          } else {
+            res.json().then(function(err) {
+              $('#err-msg-phone-number').html(err.errmsg.replace(/\n/g,"<br/>")).css('display', 'block')
+            })
+          }
+        })
+      } else {
+        $('#id_phone_number').prop('disabled', false)
+        $(this).find('i').removeClass('icon-settings').addClass('icon-check-2').css('color', '#00f2c3')
+        $(this).data('editing', true)
+      }
+    })
+    $('#btn-edit-facility').click(function() {
+      const isEditing = $(this).data('editing') || false
+      const isLoading = $(this).data('loading')
+      if (isLoading) return
+      if (isEditing) {
+        $('#id_facility_id').prop('disabled', true)
+        $(this).find('i').removeClass('icon-check-2').addClass('icon-settings').css('color', '#00f2c3')
+        $(this).data('editing', false)
+        // update facility
+        if (!$('#id_facility_id').val()) return
+        const orderNo = getOrderNo()
+        $(this).data('loading', true)
+        fetch(`/dashboard/order/${orderNo}/update-facility`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            new_facility_id: $('#id_facility_id').val(),
+          }),
+        }).then(function(res) {
+          $('#btn-edit-facility').data('loading', false)
+          if (res.ok) {
+          } else {
+            res.json().then(function(err) {
+              $('#err-msg-facility').html(err.errmsg.replace(/\n/g,"<br/>")).css('display', 'block')
+            })
+          }
+        })
+      } else {
+        $('#id_facility_id').prop('disabled', false)
+        $(this).find('i').removeClass('icon-settings').addClass('icon-check-2').css('color', '#00f2c3')
+        $(this).data('editing', true)
+      }
+    })
+    $('#btn-edit-date').click(function() {
+      const isEditing = $(this).data('editing') || false
+      const isLoading = $(this).data('loading')
+      if (isLoading) return
+      if (isEditing) {
+        $('#id_date').prop('disabled', true)
+        $(this).find('i').removeClass('icon-check-2').addClass('icon-settings').css('color', '#00f2c3')
+        $(this).data('editing', false)
+        // update date
+        if (!$('#id_date').val()) return
+        const orderNo = getOrderNo()
+        $(this).data('loading', true)
+        fetch(`/dashboard/order/${orderNo}/update-date`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            new_date: $('#id_date').val(),
+          }),
+        }).then(function(res) {
+          $('#btn-edit-date').data('loading', false)
+          if (res.ok) {
+          } else {
+            res.json().then(function(err) {
+              $('#err-msg-date').html(err.errmsg.replace(/\n/g,"<br/>")).css('display', 'block')
+            })
+          }
+        })
+      } else {
+        $('#id_date').prop('disabled', false)
+        $(this).find('i').removeClass('icon-settings').addClass('icon-check-2').css('color', '#00f2c3')
+        $(this).data('editing', true)
+      }
+    })
+    $('#btn-edit-court-type').click(function() {
+      const isEditing = $(this).data('editing') || false
+      const isLoading = $(this).data('loading')
+      if (isLoading) return
+      if (isEditing) {
+        $('#id_court_type').prop('disabled', true)
+        $(this).find('i').removeClass('icon-check-2').addClass('icon-settings').css('color', '#00f2c3')
+        $(this).data('editing', false)
+        // update court type
+        if (!$('#id_court_type').val()) return
+        const orderNo = getOrderNo()
+        $(this).data('loading', true)
+        fetch(`/dashboard/order/${orderNo}/update-court-type`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            new_court_type: $('#id_court_type').val(),
+          }),
+        }).then(function(res) {
+          $('#btn-edit-court-type').data('loading', false)
+          if (res.ok) {
+          } else {
+            res.json().then(function(err) {
+              $('#err-msg-court-type').html(err.errmsg.replace(/\n/g,"<br/>")).css('display', 'block')
+            })
+          }
+        })
+      } else {
+        $('#id_court_type').prop('disabled', false)
+        $(this).find('i').removeClass('icon-settings').addClass('icon-check-2').css('color', '#00f2c3')
+        $(this).data('editing', true)
+      }
+    })
+    $('#btn-edit-time').click(function() {
+      const isEditing = $(this).data('editing') || false
+      const isLoading = $(this).data('loading')
+      if (isLoading) return
+      if (isEditing) {
+        $('#id-time-input').prop('disabled', true)
+        $('#time-slot-list .delete-time-slot').css('display', 'none')
+        $(this).find('i').removeClass('icon-check-2').addClass('icon-settings').css('color', '#00f2c3')
+        $(this).data('editing', false)
+        // update time
+        if (!$('#id_time_list').val()) return
+        const orderNo = getOrderNo()
+        $(this).data('loading', true)
+        fetch(`/dashboard/order/${orderNo}/update-time`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            new_time_list: $('#id_time_list').val(),
+          }),
+        }).then(function(res) {
+          $('#btn-edit-time').data('loading', false)
+          if (res.ok) {
+          } else {
+            res.json().then(function(err) {
+              $('#err-msg-time').html(err.errmsg.replace(/\n/g,"<br/>")).css('display', 'block')
+            })
+          }
+        })
+      } else {
+        $('#id-time-input').prop('disabled', false)
+        $('#time-slot-list .delete-time-slot').css('display', 'block')
+        $(this).find('i').removeClass('icon-settings').addClass('icon-check-2').css('color', '#00f2c3')
+        $(this).data('editing', true)
+      }
+    })
+    $('#btn-edit-status').click(function() {
+      const isEditing = $(this).data('editing') || false
+      const isLoading = $(this).data('loading')
+      if (isLoading) return
+      if (isEditing) {
+        $('#id_status').prop('disabled', true)
+        $(this).find('i').removeClass('icon-check-2').addClass('icon-settings').css('color', '#00f2c3')
+        $(this).data('editing', false)
+        // update status
+        if (!$('#id_status').val()) return
+        const orderNo = getOrderNo()
+        $(this).data('loading', true)
+        fetch(`/dashboard/order/${orderNo}/update-status`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            new_status: $('#id_status').val()
+          }),
+        }).then(function(res) {
+          $('#btn-edit-status').data('loading', false)
+          if (res.ok) {
+          } else {
+            res.json().then(function(err) {
+              $('#err-msg-status').html(err.errmsg.replace(/\n/g,"<br/>")).css('display', 'block')
+            })
+          }
+        })
+      } else {
+        $('#id_status').prop('disabled', false)
+        $(this).find('i').removeClass('icon-settings').addClass('icon-check-2').css('color', '#00f2c3')
+        $(this).data('editing', true)
+      }
+    })
+    $('#btn-edit-price').click(function() {
+      const isEditing = $(this).data('editing') || false
+      const isLoading = $(this).data('loading')
+      if (isLoading) return
+      if (isEditing) {
+        $('#id_price').prop('disabled', true)
+        $(this).find('i').removeClass('icon-check-2').addClass('icon-settings').css('color', '#00f2c3')
+        $(this).data('editing', false)
+        // update price
+        if (!$('#id_price').val()) return
+        const orderNo = getOrderNo()
+        $(this).data('loading', true)
+        fetch(`/dashboard/order/${orderNo}/update-price`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            new_price: $('#id_price').val()
+          }),
+        }).then(function(res) {
+          $('#btn-edit-price').data('loading', false)
+          if (res.ok) {
+          } else {
+            res.json().then(function(err) {
+              $('#err-msg-price').html(err.errmsg.replace(/\n/g,"<br/>")).css('display', 'block')
+            })
+          }
+        })
+      } else {
+        $('#id_price').prop('disabled', false)
+        $(this).find('i').removeClass('icon-settings').addClass('icon-check-2').css('color', '#00f2c3')
+        $(this).data('editing', true)
+      }
+    })
+    $('#btn-edit-remark').click(function() {
+      const isEditing = $(this).data('editing') || false
+      const isLoading = $(this).data('loading')
+      if (isLoading) return
+      if (isEditing) {
+        $('#id_remark').prop('disabled', true)
+        $(this).find('i').removeClass('icon-check-2').addClass('icon-settings').css('color', '#00f2c3')
+        $(this).data('editing', false)
+        // update remark
+        if (!$('#id_remark').val()) return
+        const orderNo = getOrderNo()
+        $(this).data('loading', true)
+        fetch(`/dashboard/order/${orderNo}/update-remark`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            new_remark: $('#id_remark').val()
+          }),
+        }).then(function(res) {
+          $('#btn-edit-remark').data('loading', false)
+          if (res.ok) {
+          } else {
+            res.json().then(function(err) {
+              $('#err-msg-remark').html(err.errmsg.replace(/\n/g,"<br/>")).css('display', 'block')
+            })
+          }
+        })
+      } else {
+        $('#id_remark').prop('disabled', false)
+        $(this).find('i').removeClass('icon-settings').addClass('icon-check-2').css('color', '#00f2c3')
+        $(this).data('editing', true)
+      }
+    })
+
     $('.datepicker').datetimepicker({
       timepicker: false,
       format:'Y-m-d',
@@ -218,27 +521,6 @@
         })
       }
     });
-    $('#btn-update-price').click(function() {
-      if (!$('#id-new-price').val()) return
-      const orderNo = $(this).data("order_no")
-      $('#btn-update-price').prop('disabled', true);
-      fetch(`/dashboard/order/${orderNo}/update-price`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          new_price: $('#id-new-price').val()
-        }),
-      }).then(function(res) {
-        if (res.ok) {
-          location.reload()
-        } else {
-          $("#errmsg").css({ display: "block" })
-          $('#id-new-price').val('')
-        }
-      })
-    })
     // debounce
     $('#form').submit(function() {
       $('#btn-submit').prop('disabled', true);
@@ -251,6 +533,10 @@
     })
   });
 
+  function getOrderNo() {
+    const path = document.location.pathname
+    return path.split('/')[path.split('/').length - 1]
+  }
   function bindTimeSlotDeleteEvent() {
     $('.delete-time-slot').click(function() {
       const time = $(this).data("time")

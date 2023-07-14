@@ -33,6 +33,8 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 APPEND_SLASH = False
 
+ATOMIC_REQUESTS = True
+
 # Application definition
 
 INSTALLED_APPS = [

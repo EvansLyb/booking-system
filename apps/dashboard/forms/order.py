@@ -20,7 +20,7 @@ class OrderForm(ModelForm):
             attrs={
                 "class": "form-control",
                 "autocomplete": "off",
-                "readonly": True
+                "disabled": True
             }
         ))
     phone_number = forms.CharField(
@@ -28,7 +28,8 @@ class OrderForm(ModelForm):
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
-                "autocomplete": "off"
+                "autocomplete": "off",
+                "disabled": True
             }
         ))
     facility_id = forms.ChoiceField(
@@ -37,6 +38,7 @@ class OrderForm(ModelForm):
         widget=forms.Select(
             attrs={
                 "class": "form-control",
+                "disabled": True
             },
         ))
     date = forms.DateField(
@@ -45,7 +47,8 @@ class OrderForm(ModelForm):
             attrs={
                 "placeholder": "From",
                 "class": "form-control datepicker",
-                "autocomplete": "off"
+                "autocomplete": "off",
+                "disabled": True
             },
         ))
     court_type = forms.ChoiceField(
@@ -54,13 +57,15 @@ class OrderForm(ModelForm):
         widget=forms.Select(
             attrs={
                 "class": "form-control",
+                "disabled": True,
             },
         ))
     time_list = forms.CharField(
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
-                "autocomplete": "off"
+                "autocomplete": "off",
+                "disabled": True
             }
         ))
     status = forms.CharField(
@@ -68,6 +73,7 @@ class OrderForm(ModelForm):
             attrs={
                 "class": "form-control",
                 "autocomplete": "off",
+                "disabled": True
             }
         ))
     price = forms.DecimalField(
@@ -75,7 +81,7 @@ class OrderForm(ModelForm):
             attrs={
                 "class": "form-control price-input",
                 "autocomplete": "off",
-                "readonly": True
+                "disabled": True
             }
         ))
     remark = forms.CharField(
@@ -83,7 +89,8 @@ class OrderForm(ModelForm):
         widget=forms.Textarea(
             attrs={
                 "class": "form-control",
-                "autocomplete": "off"
+                "autocomplete": "off",
+                "disabled": True
             }
         ))
 
