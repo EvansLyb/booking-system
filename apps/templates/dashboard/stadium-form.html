@@ -150,7 +150,7 @@
     function initCurFiles() {
       var stadiumId = document.location.pathname.split('/').pop()
       if (Number.isInteger(parseInt(stadiumId))) {
-        fetch(`/dashboard/stadium/${stadiumId}/get-image-list`, {
+        fetch(`/dashboard/stadium/${stadiumId}/get-stadium-image-list`, {
           method: "GET",
         }).then(function(res) {
           res.json().then(async function(json_data) {

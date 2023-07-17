@@ -47,7 +47,7 @@ def get_stadium_list(request):
             image_list = StadiumImage.objects.filter(stadium=stadium).order_by('id')
             resp.append({
                 "name": stadium.name,
-                "image_list": image_list,
+                "image_list": [image.file_id for image in image_list],
                 "longitude": stadium.longitude,
                 "latitude": stadium.latitude,
                 "location": stadium.location,
