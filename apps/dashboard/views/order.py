@@ -507,6 +507,15 @@ def update_status(request, order_no=None):
         elif old_status != OrderStatus.REJECTED and new_status == OrderStatus.REJECTED:  # only unfreeze needed
             """ === data unfreeze === """
             unfreeze(order.facility_id, order.date, util.trans_list_str_to_list(order.time_list), order.court_type)
+            """ === refund === """
+            bills = Bill.objects.filter(order_id=order.id)
+            for bill in bills:
+                refund_amount = bill.amount - bill.refunded_amount
+                if bill.bill_type == BillType.PAYMENT and refund_amount > Decimal(0):
+                    refund_no = util.generate_refund_no(bill.trade_no)
+                    refund(bill.trade_no, refund_no, bill.amount, refund_amount)
+                    bill.refunded_amount = bill.amount
+                    bill.save()
         elif old_status != OrderStatus.REJECTED and new_status != OrderStatus.REJECTED:
             return JsonResponse(resp, safe=False, status=201)
         order.status = new_status
