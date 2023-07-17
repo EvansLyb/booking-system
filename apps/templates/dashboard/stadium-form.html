@@ -3,7 +3,93 @@
 {% block title %} Stadium {% endblock %} 
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+<style>
+  .image-preview-area {
+    display: flex;
+  }
+  .image-preview-area .delete-dot {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    top: 12px;
+    right: 12px;
+    transform: rotate(45deg);
+    cursor: pointer;
+  }
+  .image-preview-area .delete-dot::before {
+    display: block;
+    position: absolute;
+    content: "";
+    width: 10px;
+    height: 2px;
+    background-color: gray;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+  }
+  .image-preview-area .delete-dot::after {
+    display: block;
+    position: absolute;
+    content: "";
+    width: 2px;
+    height: 10px;
+    background-color: gray;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+  }
+  /* for file input */
+  .file-drop-area{
+    position: relative;
+    display: flex;
+    align-items: center;
+    /*width: 450px;*/
+    max-width: 100%;
+    padding:25px;
+    border: 1px dashed rgba(255,255,255,0.4);
+    border-radius: 3px;
+    transition: .2s;
+  }
+  .file-drop-area.loading{
+    background: url({{ ASSETS_ROOT }}/img/icon-loading.gif) no-repeat center;
+    background-size: 6%;
+    background-color: #000;
+  }
+
+  .choose-file-button{
+    flex-shrink: 0;
+    background-color: rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius: 3px;
+    padding:8px 15px;
+    margin-right: 10px;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  .file-message{
+    font-size: small;
+    font-weight: 300;
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-input{
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top:0;
+    height: 100%;
+    widows: 100%;
+    cursor: pointer;
+    opacity: 0;
+  }
+</style>
+{% endblock stylesheets %}
 
 {% block content %}
 
@@ -12,6 +98,18 @@
       <div class="card-body">
         <form role="form" method="post" action="" enctype="">
           {{form.as_p}}
+          <div>
+            <label>Image List</label>
+            <br>
+            <div id="divImageMediaPreview" class="image-preview-area">
+
+            </div>
+            <div class="file-drop-area">
+              <span class="choose-file-button">Choose Files</span>
+              <span class="file-message">or drag and drop files here</span>
+              <input id="image_list" name="image_list" type="file" class="file-input" accept=".jfif,.jpg,.jpeg,.png,.gif" multiple>
+            </div>
+          </div>
           <br>
           {% if form.errors %}
             {% for field in form %}
@@ -45,6 +143,171 @@
 {% block javascripts %}
 <script>
   $(document).ready(function() {
+    var curFiles = []
+    initCurFiles();
+
+    // file input
+    function initCurFiles() {
+      var stadiumId = document.location.pathname.split('/').pop()
+      if (Number.isInteger(parseInt(stadiumId))) {
+        fetch(`/dashboard/stadium/${stadiumId}/get-image-list`, {
+          method: "GET",
+        }).then(function(res) {
+          res.json().then(async function(json_data) {
+            for (let i = 0; i < json_data.length; i++) {
+              let imageUrl = json_data[i].image_url
+              let id = json_data[i].id
+              let file = await getFileFromUrl(imageUrl)
+              appendFile(file, json_data[i].file_id)
+            }
+          })
+        })
+      }
+    }
+    async function getFileFromUrl(url, name, defaultType = 'image/jpeg'){
+      const response = await fetch(`/dashboard/stadium/download-image-by-url`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url,
+        }),
+      })
+      const data = await response.blob();
+      return new File([data], name, {
+        type: data.type || defaultType,
+      });
+    }
+
+    $('.file-input').change(async function() {
+			const filesCount = $(this)[0].files.length;
+			if (typeof (FileReader) != "undefined") {
+        /** loading **/
+        $('.file-input').attr('disabled', true)
+        $('.file-drop-area').addClass('loading')
+        /** loading **/
+        for (let i = 0; i < filesCount; i++) {
+          let file = $(this)[0].files[i]
+          const fileId = await uploadFile(file)
+          appendFile(file, fileId)
+        }
+        /** loading **/
+        $('.file-input').attr('disabled', false)
+        $('.file-drop-area').removeClass('loading')
+        /** loading **/
+      }
+    })
+
+    async function uploadFile(file) {
+      const fileName = file.name
+      const path = `booking-system/${+Date.now()}-${fileName}`
+      const resp = await fetch(`/dashboard/stadium/get-upload-file-info`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          path,
+        }),
+      })
+      const data = await resp.json()
+      let formData = new FormData()
+      formData.append('key', path);
+      formData.append('Signature', data.authorization);
+      formData.append('x-cos-security-token', data.token);
+      formData.append('x-cos-meta-fileid', data.cos_file_id);
+      formData.append('file', $(file)[0]);
+      await fetch(data.url, {
+        method: "POST",
+        body: formData
+      })
+      // update image info to server
+      updateFileInfoToServer(path, data.file_id)
+      return data.file_id
+    }
+
+    async function updateFileInfoToServer(filePath, fileId) {
+      var stadiumId = document.location.pathname.split('/').pop()
+      if (Number.isInteger(parseInt(stadiumId))) {
+        fetch(`/dashboard/stadium/${stadiumId}/image`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file_path: filePath,
+            file_id: fileId
+          }),
+        })
+      }
+    }
+
+    function appendFile(file, fileId) {
+      var dvPreview = $("#divImageMediaPreview");
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var imgWrapper = $("<div />")
+        var img = $("<img />");
+        var deleteDot = $("<span />")
+        imgWrapper.attr("style", "padding: 10px;position: relative;")
+        img.attr("style", "width: 150px;");
+        img.attr("src", e.target.result);
+        deleteDot.attr("class", "delete-dot")
+        imgWrapper.append(img)
+        imgWrapper.append(deleteDot)
+        dvPreview.append(imgWrapper);
+
+        // bind delete event
+        deleteDot.on("click", function() {
+          removeCurFileByFileId(fileId)
+        })
+      }
+      $(file).each(function() {
+        Object.assign($(this)[0], {
+          fileId: fileId
+        })
+        reader.readAsDataURL($(this)[0]);
+        curFiles.push($(this)[0])
+      })
+
+      updateFileInputByCurFile(curFiles)
+    }
+
+    function removeCurFileByFileId(fileId) {
+      let dvPreview = $("#divImageMediaPreview");
+      for (let i = 0; i < curFiles.length; i++) {
+        if (fileId == curFiles[i].fileId) {
+          dvPreview.children('div').eq(i).remove()
+          curFiles.splice(i, 1)
+          fetch(`/dashboard/stadium/delete-image-by-file-id`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              file_id: fileId,
+            }),
+          })
+        }
+      }
+      updateFileInputByCurFile(curFiles)
+    }
+
+    function updateFileInputByCurFile() {
+      var container = new DataTransfer();
+      for (let i = 0; i < curFiles.length; i++) {
+        // fix 413 error
+        // container.items.add(curFiles[i]);
+      }
+      $('.file-input')[0].files = container.files
+    }
+
+    // debounce
+    $('#form').submit(function() {
+      $('#btn-submit').prop('disabled', true);
+      $('#btn-submit').html('Uploading images...')
+    })
   });
 </script>
 {% endblock javascripts %}

@@ -5,7 +5,7 @@ Copyright (c) 2019 - present Kyle
 
 from django.urls import path, re_path
 from apps.dashboard import views_old
-from apps.dashboard.views_old import AccountListView, StadiumListView, StadiumView, AccountView, PriceView, PriceListView
+from apps.dashboard.views_old import AccountListView, AccountView, PriceView, PriceListView
 from .views.lock import LockView, get_lock_info
 from .views.facility import FacilityListView, FacilityView, FacilityCoverImageView, get_cover_image_list, download_cover_image_by_url, get_upload_image_info, delete_cover_image_by_file_id
 from .views.order import (
@@ -22,6 +22,7 @@ from .views.order import (
     update_remark as update_order_remark,
     update_price as update_order_price
 )
+from .views.stadium import StadiumListView, StadiumView, StadiumImageView, get_stadium_image_list, delete_stadium_image_by_file_id
 
 urlpatterns = [
 
@@ -31,6 +32,11 @@ urlpatterns = [
     path('/stadium/list', StadiumListView.as_view(), name='dashboard_stadium_list'),
     path('/stadium', StadiumView.as_view()),
     path('/stadium/<int:id>', StadiumView.as_view(), name='dashboard_stadium'),
+    path('/stadium/<int:id>/get-stadium-image-list', get_stadium_image_list),
+    path('/stadium/download-image-by-url', download_cover_image_by_url),
+    path('/stadium/get-upload-file-info', get_upload_image_info),
+    path('/stadium/delete-image-by-file-id', delete_stadium_image_by_file_id),
+    path('/stadium/<int:id>/image', StadiumImageView.as_view()),
     path('/facility/list', FacilityListView.as_view(), name='dashboard_facility_list'),
     path('/facility', FacilityView.as_view()),
     path('/facility/<int:id>', FacilityView.as_view(), name='dashboard_facility'),

@@ -20,6 +20,12 @@ class Stadium(models.Model):
     description = models.TextField('description', blank=True, default='')
 
 
+class StadiumImage(models.Model):
+    stadium = models.ForeignKey(Stadium, on_delete=models.SET_NULL, null=True, blank=True)
+    file_path = models.CharField('file_path', max_length=2048, blank=False, default="")
+    file_id = models.CharField('file_id', max_length=2048, blank=False, default="")
+
+
 class Facility(models.Model):
     name = models.CharField('name', max_length=256, blank=False)
     description = RichTextUploadingField('description', default='', blank=True)

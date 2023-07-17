@@ -14,7 +14,7 @@ import datetime
 import ast
 from decimal import Decimal
 
-from apps.dashboard.models import Facility, Stadium, FacilityCoverImage, Price, Freeze, Order, Bill, OrderStatus, BillType
+from apps.dashboard.models import Facility, Stadium, StadiumImage, FacilityCoverImage, Price, Freeze, Order, Bill, OrderStatus, BillType
 from apps.apis.models import User
 from utils.payment import unified_order
 from utils.sms import send_sms
@@ -44,8 +44,10 @@ def get_stadium_list(request):
         stadium_list = Stadium.objects.all()
         resp = []
         for stadium in stadium_list:
+            image_list = StadiumImage.objects.filter(stadium=stadium).order_by('id')
             resp.append({
                 "name": stadium.name,
+                "image_list": image_list,
                 "longitude": stadium.longitude,
                 "latitude": stadium.latitude,
                 "location": stadium.location,

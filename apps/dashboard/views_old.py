@@ -97,61 +97,6 @@ class AccountView(LoginRequiredMixin, View):
         return HttpResponse("", status=204)
 
 
-class StadiumListView(LoginRequiredMixin, ListView):
-    model = Stadium
-    paginate_by = NUMBER_OF_PAGE
-    template_name = 'dashboard/stadium.html'
-
-    def get_queryset(self) -> QuerySet[Any]:
-        context = Stadium.objects.all()
-        return context
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        return context
-
-
-class StadiumView(LoginRequiredMixin, View):
-    login_url = '/login'
-    redirect_field_name = 'redirect_to'
-
-    def get(self, request, id=None):
-        context = {}
-        if not id:
-            form = StadiumForm(request.POST or None)
-            html_template = loader.get_template('dashboard/stadium-form.html')
-            return HttpResponse(html_template.render({"form": form}, request))
-
-        stadium = Stadium.objects.get(id=id)
-
-        form = StadiumForm(request.POST or None, instance=stadium)
-        html_template = loader.get_template('dashboard/stadium-form.html')
-        return HttpResponse(html_template.render({"form": form}, request))
-
-    def post(self, request, id=None):
-        # create
-        if not id:
-            form = StadiumForm(request.POST or None)
-        # update
-        else:
-            stadium = Stadium.objects.get(id=id)
-            form = StadiumForm(request.POST or None, instance=stadium)
-
-        if form.is_valid():
-            stadium = form.save()
-            return redirect("/dashboard/stadium/list")
-
-        return render(request, "dashboard/stadium-form.html", {"form": form})
-
-    def delete(self, request, id):
-        try:
-            stadium = Stadium.objects.get(id=id)
-            stadium.delete()
-        except:
-            pass
-        return HttpResponse("", status=204)
-
-
 class PriceListView(LoginRequiredMixin, ListView):
     model = Price
     paginate_by = NUMBER_OF_PAGE
