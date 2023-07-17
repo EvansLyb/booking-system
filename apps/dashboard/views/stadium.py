@@ -88,14 +88,13 @@ class StadiumImageView(LoginRequiredMixin, View):
     redirect_field_name = 'redirect_to'
 
     def post(self, request, id=None):
-        if not id:
-            json_data = json.loads(request.body)
-            file_path = json_data.get('file_path', '')
-            file_id = json_data.get('file_id', '')
-            stadium = Stadium.objects.filter(id=id).first()
-            if stadium:
-                StadiumImage.objects.create(stadium=stadium, file_path=file_path, file_id=file_id)
-            return JsonResponse({}, safe=False, status=201)
+        json_data = json.loads(request.body)
+        file_path = json_data.get('file_path', '')
+        file_id = json_data.get('file_id', '')
+        stadium = Stadium.objects.filter(id=id).first()
+        if stadium:
+            StadiumImage.objects.create(stadium=stadium, file_path=file_path, file_id=file_id)
+        return JsonResponse({}, safe=False, status=201)
 
 
 def get_stadium_image_list(request, id=None):
