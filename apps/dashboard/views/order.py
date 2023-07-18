@@ -141,8 +141,12 @@ class OrderView(LoginRequiredMixin, View):
 
         form = OrderForm(request.POST or None, instance=order)
         html_template = loader.get_template('dashboard/order-form.html')
+
+        # context - bills
+        bill_list = Bill.objects.filter(order_id=order.id).order_by('created_at')
         return HttpResponse(html_template.render({
             "form": form,
+            "bill_list": bill_list,
             "order_status_selector": order_status_selector,
             "current_order_status": current_order_status,
         }, request))
