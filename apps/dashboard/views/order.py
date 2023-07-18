@@ -521,6 +521,8 @@ def update_status(request, order_no=None):
                     bill.refunded_amount = bill.amount
                     bill.save()
         elif old_status != OrderStatus.REJECTED and new_status != OrderStatus.REJECTED:
+            order.status = new_status
+            order.save()
             return JsonResponse(resp, safe=False, status=201)
         order.status = new_status
         order.save()
