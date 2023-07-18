@@ -114,16 +114,17 @@
                   {% for order_status in order_status_selector %}
                   <option
                     value="{{order_status.0}}"
-                    {% if order_status.0 == 'Pending Payment' %}disabled{% endif %}
+                    {% if order_status.0 == 'Pending Payment' %}disabled
+                    {% comment %} if current order status is "Pending Payment", allow directly reject this order {% endcomment %}
+                    {% elif current_order_status == 'Pending Payment' and order_status.0 != 'Rejected' %}disabled
+                    {% endif %}
                     {% if order_status.0 == current_order_status %}selected{% endif %}
                   >{{order_status.0}}</option>
                   {% endfor %}
                 </select>
-                {% if current_order_status != 'Pending Payment' %}
                 <button id="btn-edit-status" type="button" rel="tooltip" class="btn btn-success btn-link btn-icon btn-sm btn-edit" data-toggle="tooltip" data-placement="top" title="Edit">
                   <i class="tim-icons icon-settings"></i>
                 </button>
-                {% endif %}
               </div>
               <div id="err-msg-status" class="alert alert-danger" style="display:none;margin-top:10px;padding:6px 20px;font-size:14px;"></div>
             </div>
