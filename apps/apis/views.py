@@ -355,12 +355,12 @@ def get_order_list(request):
     if request.method == 'GET':
         open_id = request.headers.get('X-Wx-Openid', '')
         if not open_id:
-            return JsonResponse({"errcode": 1, "errmsg": "", list: []}, safe=False, status=400)
+            return JsonResponse({"errcode": 1, "errmsg": "", "list": []}, safe=False, status=400)
 
         user = User.objects.filter(open_id=open_id).first()
         if not user:
             print('User does not exist, open_id: {}'.format(open_id))
-            return JsonResponse({"errcode": 1, "errmsg": "", list: []}, safe=False, status=400)
+            return JsonResponse({"errcode": 1, "errmsg": "", "list": []}, safe=False, status=400)
 
         order_list = Order.objects.filter(user_id=user.id).order_by("-updated_at")
         resp = {
