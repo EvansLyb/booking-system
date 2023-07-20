@@ -529,6 +529,8 @@ def update_status(request, order_no=None):
                         ]
                     )
                 except Exception as e:
+                    print("Failed: send_sms")
+                    print(e)
                     pass
         elif old_status != OrderStatus.REJECTED and new_status == OrderStatus.REJECTED:  # only unfreeze needed
             """ === data unfreeze === """
@@ -542,15 +544,7 @@ def update_status(request, order_no=None):
                     refund(bill.trade_no, refund_no, bill.amount, refund_amount)
                     bill.refunded_amount = bill.amount
                     bill.save()
-        elif old_status != OrderStatus.REJECTED and new_status != OrderStatus.REJECTED:
-            order.status = new_status
-            order.save()
-            return JsonResponse(resp, safe=False, status=201)
-        order.status = new_status
-        order.save()
-
-        """ === sms ==="""
-        if old_status != OrderStatus.REJECTED and new_status == OrderStatus.REJECTED:
+            """ === sms ==="""
             try:
                 # generate url scheme
                 resp = generate_scheme(order.id)
@@ -567,25 +561,15 @@ def update_status(request, order_no=None):
                     ]
                 )
             except Exception as e:
+                print("Failed: send_sms")
+                print(e)
                 pass
-        elif old_status != OrderStatus.ACCEPTED and new_status == OrderStatus.ACCEPTED:
-            try:
-                # generate url scheme
-                resp = generate_scheme(order.id)
-                url_scheme = resp.get("openlink", "")
-                # send sms
-                send_sms(
-                    phone_number_list=[order.phone_number],
-                    template_id=settings.TENCENT_CLOUD_SMS_TEMPLATE_ID_ORDER_UPDATED,
-                    template_param_list=[
-                        "已成功预定",
-                        "{}".format(url_scheme),
-                        "has been accepted",
-                        "{}".format(url_scheme),
-                    ]
-                )
-            except Exception as e:
-                pass
+        elif old_status != OrderStatus.REJECTED and new_status != OrderStatus.REJECTED:
+            order.status = new_status
+            order.save()
+            return JsonResponse(resp, safe=False, status=201)
+        order.status = new_status
+        order.save()
         return JsonResponse(resp, safe=False, status=201)
 
 
