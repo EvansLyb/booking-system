@@ -14,6 +14,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, FileResponse, Http404
 from django.template import loader
 from django.core.paginator import Paginator
+from django.conf import settings
 
 import math
 import uuid
@@ -26,6 +27,8 @@ from apps.dashboard.models import Order, Facility, Bill, BillType, OrderStatus, 
 from apps.apis.models import User
 from apps.dashboard.forms.order import OrderForm
 from utils import util
+from utils.sms import send_sms
+from utils.url_scheme import generate_scheme
 from utils.payment import refund
 from utils.order import calc_unpay_amount, freeze, unfreeze
 
@@ -526,6 +529,44 @@ def update_status(request, order_no=None):
             return JsonResponse(resp, safe=False, status=201)
         order.status = new_status
         order.save()
+
+        """ === sms ==="""
+        if old_status != OrderStatus.REJECTED and new_status == OrderStatus.REJECTED:
+            try:
+                # generate url scheme
+                resp = generate_scheme(order.id)
+                url_scheme = resp.get("openlink", "")
+                # send sms
+                send_sms(
+                    phone_number_list=[order.phone_number],
+                    template_id=settings.TENCENT_CLOUD_SMS_TEMPLATE_ID_ORDER_UPDATED,
+                    template_param_list=[
+                        "已被拒绝",
+                        "{}".format(url_scheme),
+                        "has been rejected",
+                        "{}".format(url_scheme),
+                    ]
+                )
+            except Exception as e:
+                pass
+        elif old_status != OrderStatus.ACCEPTED and new_status == OrderStatus.ACCEPTED:
+            try:
+                # generate url scheme
+                resp = generate_scheme(order.id)
+                url_scheme = resp.get("openlink", "")
+                # send sms
+                send_sms(
+                    phone_number_list=[order.phone_number],
+                    template_id=settings.TENCENT_CLOUD_SMS_TEMPLATE_ID_ORDER_UPDATED,
+                    template_param_list=[
+                        "已成功预定",
+                        "{}".format(url_scheme),
+                        "has been accepted",
+                        "{}".format(url_scheme),
+                    ]
+                )
+            except Exception as e:
+                pass
         return JsonResponse(resp, safe=False, status=201)
 
 
@@ -549,7 +590,23 @@ def update_price(request, order_no=None):
             order.price = new_price
             order.status = OrderStatus.PENDING_PAYMENT
             order.save()
-            # TODO: send sms
+            try:
+                # generate url scheme
+                resp = generate_scheme(order.id)
+                url_scheme = resp.get("openlink", "")
+                # send sms
+                send_sms(
+                    phone_number_list=[order.phone_number],
+                    template_id=settings.TENCENT_CLOUD_SMS_TEMPLATE_ID_ORDER_UPDATED,
+                    template_param_list=[
+                        "价格发生改变",
+                        "{}".format(url_scheme),
+                        "price has been updated",
+                        "{}".format(url_scheme),
+                    ]
+                )
+            except Exception as e:
+                pass
         elif new_price < order.price:
             bills = Bill.objects.filter(order_id=order.id)
             unpay_amount = calc_unpay_amount(order.id, order, bills)

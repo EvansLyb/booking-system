@@ -168,6 +168,12 @@ CLOUD_ENV = "prod-7gol3cjtf90db7de"
 MCH_ID = "1624257481"
 SERVICE = "booking-system"
 APP_ID = "wx07aa26735a64ea3a"
+TENCENT_CLOUD_SECRET_ID = "AKIDJUSFF3eqoZ6QXSAevzqX2JNHzVotjQxQ"
+TENCENT_CLOUD_SECRET_KEY = "QhtwlNmxq7HC9xZzJcs21sZ8WhR0OZWI"
+TENCENT_CLOUD_SMS_SDK_APP_ID = "1400835184"
+TENCENT_CLOUD_SMS_SIGN_NAME = "上海瑞可碧"
+TENCENT_CLOUD_SMS_TEMPLATE_ID_NEW_ORDER = "1870576"
+TENCENT_CLOUD_SMS_TEMPLATE_ID_ORDER_UPDATED = "1870565"
 #############################################################
 
 #############################################################

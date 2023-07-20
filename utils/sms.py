@@ -1,32 +1,47 @@
 from django.conf import settings
+from tencentcloud.common import credential
+from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
+from tencentcloud.sms.v20210111 import sms_client, models
+from tencentcloud.common.profile.client_profile import ClientProfile
+from tencentcloud.common.profile.http_profile import HttpProfile
 
-import requests
 
-def send_sms():
-    request_url = "http://api.weixin.qq.com/tcb/sendsms"
-    headers = {
-        "Content-Type": "application/json;charset=UTF-8"
-    }
-    data = {
-        "env": settings.CLOUD_ENV,
-        "sms_type": "Notification",
-        "template_id": "923584",
-        "template_param_list": ["商品", "/index.html"],
-        "phone_number_list": ["+8613751787141"],
-        "use_short_name": False,
-        "resource_appid": settings.APP_ID
-    }
+"""
+--- send to admin ---
+Scene 1: use created a new order
+
+--- send to user ---
+Scene 1: order price up && order status != Rejected
+Scene 2: order status changed to Accepted
+Scene 2: order status changed to Rejected
+"""
+
+""" https://cloud.tencent.com/document/product/382/43196 """
+def send_sms(phone_number_list, template_id, template_param_list):
+    if not phone_number_list or len(phone_number_list) == 0:
+        return
+
+    cred = credential.Credential(settings.TENCENT_CLOUD_SECRET_ID, settings.TENCENT_CLOUD_SECRET_KEY)
+
+    httpProfile = HttpProfile()
+
+    clientProfile = ClientProfile()
+    clientProfile.signMethod = "TC3-HMAC-SHA256"
+    clientProfile.language = "en-US"
+    clientProfile.httpProfile = httpProfile
+
+    client = sms_client.SmsClient(cred, "ap-guangzhou", clientProfile)
+
+    req = models.SendSmsRequest()
+    req.SmsSdkAppId = settings.TENCENT_CLOUD_SMS_SDK_APP_ID
+    req.SignName = settings.TENCENT_CLOUD_SMS_SIGN_NAME
+    req.TemplateId = template_id
+    req.TemplateParamSet = template_param_list
+    req.PhoneNumberSet = phone_number_list
     try:
-      resp = requests.post(request_url, json=data, headers=headers)
-      resp = resp.json()
-      print('request sendsmsv2, resp:')
+      resp = client.SendSms(req)
+      print('request sendsms, resp:')
       print(resp)
-
-      errcode = resp.get('errcode', None)
-      if errcode != 0:
-          print("Failed: send_sms")
-          print(resp.get("errmsg", ""))
-          raise Exception(resp.get("errmsg", ""))
       return resp
     except Exception as e:
         print("Failed: send_sms")

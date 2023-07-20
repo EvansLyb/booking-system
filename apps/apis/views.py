@@ -16,6 +16,7 @@ from decimal import Decimal
 
 from apps.dashboard.models import Facility, Stadium, StadiumImage, FacilityCoverImage, Price, Freeze, Order, Bill, OrderStatus, BillType
 from apps.apis.models import User
+from apps.authentication.models import Account
 from utils.payment import unified_order
 from utils.sms import send_sms
 from utils.util import get_freeze_weights_by_court_type, generate_order_no, generate_trade_no, get_order_no_by_trade_no
@@ -235,6 +236,15 @@ def create_order(request):
                 is_full_day=is_full_day,
                 remark=remark
             )
+            """ send sms """
+            try:
+                admin_list = Account.objects.all()
+                admin_phone_number_list = [admin.phone_number for admin in admin_list if admin.phone_number]
+                template_id = settings.TENCENT_CLOUD_SMS_TEMPLATE_ID_NEW_ORDER
+                template_param_list = ["{}".format(user.phone_number)]
+                send_sms(phone_number_list=admin_phone_number_list, template_id=template_id, template_param_list=template_param_list)
+            except Exception as e:
+                pass
             return JsonResponse({"errcode": 0, "errmsg": "", "order_id": order.id}, safe=False, status=201)
         else:
             order = Order.objects.create(
@@ -250,6 +260,15 @@ def create_order(request):
                 is_full_day=is_full_day,
                 remark=remark
             )
+            """ send sms """
+            try:
+                admin_list = Account.objects.all()
+                admin_phone_number_list = [admin.phone_number for admin in admin_list if admin.phone_number]
+                template_id = settings.TENCENT_CLOUD_SMS_TEMPLATE_ID_NEW_ORDER
+                template_param_list = ["{}".format(user.phone_number)]
+                send_sms(phone_number_list=admin_phone_number_list, template_id=template_id, template_param_list=template_param_list)
+            except Exception as e:
+                pass
             return JsonResponse({"errcode": 0, "errmsg": "", "order_id": order.id}, safe=False, status=201)
 
 
@@ -427,7 +446,7 @@ def get_order_details(request, oid=None):
 
 def t_send_sms(request):
     try:
-      resp = send_sms()
+      resp = send_sms(["+8613751787141"], settings.TENCENT_CLOUD_SMS_TEMPLATE_ID_NEW_ORDER, ["13788888888"])
       return JsonResponse(resp, safe=False, status=201)
     except Exception as e:
         print("Failed: send_sms")
