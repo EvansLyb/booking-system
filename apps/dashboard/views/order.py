@@ -555,7 +555,7 @@ def update_status(request, order_no=None):
                     template_id=settings.TENCENT_CLOUD_SMS_TEMPLATE_ID_ORDER_UPDATED,
                     template_param_list=[
                         "已被拒绝",
-                        "{}".format(url_scheme),
+                        "{} ".format(url_scheme),
                         "has been rejected",
                         "{}".format(url_scheme),
                     ]
@@ -603,7 +603,7 @@ def update_price(request, order_no=None):
                     template_id=settings.TENCENT_CLOUD_SMS_TEMPLATE_ID_ORDER_UPDATED,
                     template_param_list=[
                         "价格发生改变",
-                        "{}".format(url_scheme),
+                        "{} ".format(url_scheme),
                         "price has been updated",
                         "{}".format(url_scheme),
                     ]
