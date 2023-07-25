@@ -442,7 +442,7 @@ def get_order_details(request, oid=None):
         resp["remark"] = order.remark
         resp["time_list"] = ast.literal_eval(order.time_list)
 
-        is_cancellable = check_if_order_is_cancellable(order.id)
+        is_cancellable = check_if_order_is_cancellable(order)
         resp["is_cancellable"] = is_cancellable
         return JsonResponse(resp, safe=False, status=200)
 
@@ -465,7 +465,7 @@ def cancel_order(request):
             resp["errcode"] = 1
             return JsonResponse(resp, safe=False, status=404)
 
-        is_cancellable = check_if_order_is_cancellable(order.id)
+        is_cancellable = check_if_order_is_cancellable(order)
         if not is_cancellable:
             errmsg = "order {} is not cancellable".format(order.id)
             resp["errmsg"] = errmsg

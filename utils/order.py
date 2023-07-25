@@ -1,6 +1,6 @@
 import datetime
 
-from apps.dashboard.models import Order, Bill, BillType, Freeze
+from apps.dashboard.models import Order, Bill, BillType, Freeze, OrderStatus
 from utils import util
 
 
@@ -53,8 +53,10 @@ def freeze(facility_id, date, time_list, court_type):
         freeze.save()
 
 
-def check_if_order_is_cancellable(order_id) -> bool:
-    bill_list = Bill.objects.filter(order_id=order_id)
+def check_if_order_is_cancellable(order) -> bool:
+    if order.status == OrderStatus.CANCELLED:
+        return False
+    bill_list = Bill.objects.filter(order_id=order.id)
     if not bill_list:
         return True
     return False
