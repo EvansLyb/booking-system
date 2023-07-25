@@ -100,6 +100,7 @@ class OrderStatus(models.TextChoices):
     PENDING_CONFIRMATION = "Pending Confirmation"
     ACCEPTED = "Accepted"
     REJECTED = "Rejected"
+    CANCELLED = "Cancelled"
 
 
 class Order(models.Model):

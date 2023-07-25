@@ -20,7 +20,7 @@ from apps.authentication.models import Account
 from utils.payment import unified_order
 from utils.sms import send_sms
 from utils.util import get_freeze_weights_by_court_type, generate_order_no, generate_trade_no, get_order_no_by_trade_no
-from utils.order import calc_unpay_amount, freeze, unfreeze
+from utils.order import calc_unpay_amount, freeze, unfreeze, check_if_order_is_cancellable
 
 
 def get_facility_list(request):
@@ -441,6 +441,38 @@ def get_order_details(request, oid=None):
         resp["updated_at"] = order.updated_at
         resp["remark"] = order.remark
         resp["time_list"] = ast.literal_eval(order.time_list)
+
+        is_cancellable = check_if_order_is_cancellable(order.id)
+        resp["is_cancellable"] = is_cancellable
+        return JsonResponse(resp, safe=False, status=200)
+
+
+def cancel_order(request, oid=None):
+    if request.method == 'POST':
+        resp = {
+            "errcode": 0,
+            "errmsg": ""
+        }
+
+        if not oid:
+            resp["errcode"] = 1
+            return JsonResponse(resp, safe=False, status=400)
+
+        order = Order.objects.filter(id=oid).first()
+        if not order:
+            resp["errcode"] = 1
+            return JsonResponse(resp, safe=False, status=404)
+
+        is_cancellable = check_if_order_is_cancellable(order.id)
+        if not is_cancellable:
+            errmsg = "order {} is not cancellable".format(order.id)
+            resp["errmsg"] = errmsg
+            print("Failed: cancel_order")
+            print(errmsg)
+            return JsonResponse(resp, safe=False, status=400)
+
+        order.status = OrderStatus.CANCELLED
+        order.save()
         return JsonResponse(resp, safe=False, status=200)
 
 

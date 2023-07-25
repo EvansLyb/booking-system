@@ -64,6 +64,10 @@
                     <input class="form-check-input" name="status" type="checkbox" id="id_status_3" value="Rejected" {% if 'Rejected' in request.GET|get_list:'status' %}checked{% endif %}>
                     <label class="form-check-label" for="id_status_3">Rejected</label>
                   </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" name="status" type="checkbox" id="id_status_4" value="Cancelled" {% if 'Cancelled' in request.GET|get_list:'status' %}checked{% endif %}>
+                    <label class="form-check-label" for="id_status_4">Cancelled</label>
+                  </div>
                 </div>
               </div>
               <button id="btn-filter" type="button card-title" class="btn btn-primary">Filter</button>
@@ -111,6 +115,8 @@
                       {% elif order.status == 'Accepted' %}
                       <div style="color: #32CD32;border: 1px solid #32CD32;padding: 3px 6px;">{{ order.status }}</div>
                       {% elif order.status == 'Rejected' %}
+                      <div style="color: #808080;border: 1px solid #808080;padding: 3px 6px;">{{ order.status }}</div>
+                      {% elif order.status == 'Cancelled' %}
                       <div style="color: #808080;border: 1px solid #808080;padding: 3px 6px;">{{ order.status }}</div>
                       {% endif %}
                     </td>

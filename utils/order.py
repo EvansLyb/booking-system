@@ -51,3 +51,10 @@ def freeze(facility_id, date, time_list, court_type):
                 weights=util.get_freeze_weights_by_court_type(court_type)
             )
         freeze.save()
+
+
+def check_if_order_is_cancellable(order_id) -> bool:
+    bill_list = Bill.objects.filter(order_id=order_id)
+    if not bill_list:
+        return True
+    return False
