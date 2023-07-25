@@ -30,7 +30,7 @@ urlpatterns = [
     path('/get-price-info/<int:fid>', get_price_info),
     path('/get-freeze', get_freeze),
     path('/create-order', create_order),
-    path('/cancel-order/<int:oid>', cancel_order),
+    path('/cancel-order', cancel_order),
     path('/checkout', checkout),
     path('/pay/callback', payment_callback),
     path('/refund/callback', refund_callback),

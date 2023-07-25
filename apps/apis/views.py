@@ -447,18 +447,20 @@ def get_order_details(request, oid=None):
         return JsonResponse(resp, safe=False, status=200)
 
 
-def cancel_order(request, oid=None):
+def cancel_order(request):
     if request.method == 'POST':
         resp = {
             "errcode": 0,
             "errmsg": ""
         }
 
-        if not oid:
+        json_data = json.loads(request.body)
+        order_id = json_data.get("order_id", None)
+        if not order_id:
             resp["errcode"] = 1
             return JsonResponse(resp, safe=False, status=400)
 
-        order = Order.objects.filter(id=oid).first()
+        order = Order.objects.filter(id=order_id).first()
         if not order:
             resp["errcode"] = 1
             return JsonResponse(resp, safe=False, status=404)
