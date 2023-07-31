@@ -31,7 +31,7 @@ from utils.sms import send_sms
 from utils.url_scheme import generate_scheme
 from utils.payment import refund
 from utils.order import calc_unpay_amount, freeze, unfreeze, get_user_by_order
-from utils.subscribe_message import send_subscribe_message
+from utils.subscribe_message import send_subscribe_message_after_order_status_update
 
 
 NUMBER_OF_PAGE = 25
@@ -519,11 +519,12 @@ def update_status(request, order_no=None):
                     user = get_user_by_order(order)
                     facility_name = order.facility_name
                     if user.open_id and facility_name:
-                        send_subscribe_message(
+                        send_subscribe_message_after_order_status_update(
                             open_id=user.open_id,
                             order_no=order.order_no,
                             order_status="预定成功(Accepted)",
-                            facility_name=facility_name
+                            facility_name=facility_name,
+                            order_id=order.id
                         )
                     # generate url scheme
                     resp = generate_scheme(order.id)
@@ -561,11 +562,12 @@ def update_status(request, order_no=None):
                 user = get_user_by_order(order)
                 facility_name = order.facility_name
                 if user.open_id and facility_name:
-                    send_subscribe_message(
+                    send_subscribe_message_after_order_status_update(
                         open_id=user.open_id,
                         order_no=order.order_no,
                         order_status="预定失败(Rejected)",
-                        facility_name=facility_name
+                        facility_name=facility_name,
+                        order_id=order.id
                     )
                 # generate url scheme
                 resp = generate_scheme(order.id)
@@ -595,11 +597,12 @@ def update_status(request, order_no=None):
                     user = get_user_by_order(order)
                     facility_name = order.facility_name
                     if user.open_id and facility_name:
-                        send_subscribe_message(
+                        send_subscribe_message_after_order_status_update(
                             open_id=user.open_id,
                             order_no=order.order_no,
                             order_status="预定成功(Accepted)",
-                            facility_name=facility_name
+                            facility_name=facility_name,
+                            order_id=order.id
                         )
                     # generate url scheme
                     resp = generate_scheme(order.id)

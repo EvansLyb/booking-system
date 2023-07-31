@@ -6,7 +6,7 @@ import requests
 
 """ https://developers.weixin.qq.com/miniprogram/dev/wxcloudrun/src/scene/deploy/subscribe.html """
 """ https://developers.weixin.qq.com/miniprogram/dev/OpenApiDoc/mp-message-management/subscribe-message/sendMessage.html """
-def send_subscribe_message(open_id, order_no, order_status, facility_name):
+def send_subscribe_message_after_order_status_update(open_id, order_no, order_status, facility_name, order_id):
     request_url = "http://api.weixin.qq.com/cgi-bin/message/subscribe/send"
     headers = {
         "Content-Type": "application/json;charset=UTF-8"
@@ -19,7 +19,8 @@ def send_subscribe_message(open_id, order_no, order_status, facility_name):
             "character_string1": order_no,
             "thing2": order_status,
             "thing17": facility_name
-        }
+        },
+        "page": "pages/orderDetails/index?id={}".format(order_id)
     }
     try:
       resp = requests.post(request_url, json=data, headers=headers)
