@@ -16,13 +16,21 @@ def send_subscribe_message_after_order_status_update(open_id, order_no, order_st
         "template_id": settings.TENCENT_CLOUD_SUBSCRIBE_MESSAGE_ID_ORDER_STATUS_UPDATED,
         "miniprogram_state": "developer",
         "data": {
-            "character_string1": order_no,
-            "thing2": order_status,
-            "thing17": facility_name
+            "character_string1": {
+                "value": order_no
+            },
+            "thing2": {
+                "value": order_status
+            },
+            "thing17": {
+                "value": facility_name
+            }
         },
         "page": "pages/orderDetails/index?id={}".format(order_id)
     }
     try:
+      print("Request: /cgi-bin/message/subscribe/send, data: ")
+      print(data)
       resp = requests.post(request_url, json=data, headers=headers)
       resp = resp.json()
 
