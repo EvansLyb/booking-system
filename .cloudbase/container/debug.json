@@ -3,8 +3,7 @@
     {
       "name": "booking-system-service",
       "domain": "",
-      "ip": "",
-      "containerId": "da468a1a838ce3e503a3b5b54654b9ab07e7378e94ac9d393fc012e053522ac1"
+      "ip": ""
     }
   ],
   "config": {

@@ -1,6 +1,7 @@
 import datetime
 
 from apps.dashboard.models import Order, Bill, BillType, Freeze, OrderStatus
+from apps.apis.models import User
 from utils import util
 
 
@@ -60,3 +61,15 @@ def check_if_order_is_cancellable(order) -> bool:
     if not bill_list:
         return True
     return False
+
+
+def get_user_by_order(order):
+    user_id = order.user_id
+    if not user_id:
+        return None
+    
+    user = User.objects.filter(id=user_id).first()
+    if not user:
+        return None
+    
+    return user

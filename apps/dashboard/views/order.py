@@ -30,7 +30,8 @@ from utils import util
 from utils.sms import send_sms
 from utils.url_scheme import generate_scheme
 from utils.payment import refund
-from utils.order import calc_unpay_amount, freeze, unfreeze
+from utils.order import calc_unpay_amount, freeze, unfreeze, get_user_by_order
+from utils.subscribe_message import send_subscribe_message
 
 
 NUMBER_OF_PAGE = 25
@@ -514,6 +515,16 @@ def update_status(request, order_no=None):
             """ === sms ==="""
             if new_status == OrderStatus.ACCEPTED:
                 try:
+                    # send subscribe message
+                    user = get_user_by_order(order)
+                    facility_name = order.facility_name
+                    if user.open_id and facility_name:
+                        send_subscribe_message(
+                            open_id=user.open_id,
+                            order_no=order.order_no,
+                            order_status="预定成功(Accepted)",
+                            facility_name=facility_name
+                        )
                     # generate url scheme
                     resp = generate_scheme(order.id)
                     url_scheme = resp.get("openlink", "")
@@ -546,6 +557,16 @@ def update_status(request, order_no=None):
                     bill.save()
             """ === sms ==="""
             try:
+                # send subscribe message
+                user = get_user_by_order(order)
+                facility_name = order.facility_name
+                if user.open_id and facility_name:
+                    send_subscribe_message(
+                        open_id=user.open_id,
+                        order_no=order.order_no,
+                        order_status="预定失败(Rejected)",
+                        facility_name=facility_name
+                    )
                 # generate url scheme
                 resp = generate_scheme(order.id)
                 url_scheme = resp.get("openlink", "")
@@ -570,6 +591,16 @@ def update_status(request, order_no=None):
             """ === sms ==="""
             if new_status == OrderStatus.ACCEPTED:
                 try:
+                    # send subscribe message
+                    user = get_user_by_order(order)
+                    facility_name = order.facility_name
+                    if user.open_id and facility_name:
+                        send_subscribe_message(
+                            open_id=user.open_id,
+                            order_no=order.order_no,
+                            order_status="预定成功(Accepted)",
+                            facility_name=facility_name
+                        )
                     # generate url scheme
                     resp = generate_scheme(order.id)
                     url_scheme = resp.get("openlink", "")
