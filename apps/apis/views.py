@@ -40,6 +40,25 @@ def get_facility_list(request):
         return JsonResponse(resp, safe=False)
 
 
+def get_facility_details(request, fid=None):
+    if request.method == 'GET':
+        resp = {
+            "errcode": 0,
+            "errmsg": ""
+        }
+        if not fid:
+            resp['errcode'] = 1
+            return JsonResponse(resp, safe=False)
+
+        facility = Facility.objects.filter(id=fid).first()
+        cover_image_list = FacilityCoverImage.objects.filter(facility=facility).order_by('id')
+        resp['id'] = facility.id
+        resp['name'] = facility.name
+        resp['cover_image_list'] = [cover_image.file_id for cover_image in cover_image_list]
+        resp['description'] = facility.description
+        return JsonResponse(resp, safe=False)
+
+
 def get_stadium_list(request):
     if request.method == 'GET':
         stadium_list = Stadium.objects.all()
