@@ -9,6 +9,9 @@
 ## 实时开发
 代码变动时，不需要重新构建和启动容器，即可查看变动后的效果。请参考[微信云托管实时开发指南](https://developers.weixin.qq.com/miniprogram/dev/wxcloudrun/src/guide/debug/dev.html)
 
+## 部署发布
+代码推送到master(可设置, 详情参考文档)分支时，云托管自动触发流水线。请参考[微信云托管服务管理指南](https://developers.weixin.qq.com/miniprogram/dev/wxcloudrun/src/guide/service/pipeline.html#%E6%B5%81%E6%B0%B4%E7%BA%BF)
+
 ## Dockerfile最佳实践
 请参考[如何提高项目构建效率](https://developers.weixin.qq.com/miniprogram/dev/wxcloudrun/src/scene/build/speed.html)
 
