@@ -41,6 +41,7 @@ class LockForm(Form):
         ))
     from_time = forms.TimeField(
         required=True,
+        initial="00:00",
         widget=forms.TimeInput(
             attrs={
                 "placeholder": "From",
@@ -51,6 +52,7 @@ class LockForm(Form):
         ))
     to_time = forms.TimeField(
         required=True,
+        initial="23:30",
         widget=forms.TimeInput(
             attrs={
                 "placeholder": "To",
