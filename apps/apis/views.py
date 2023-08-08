@@ -447,6 +447,7 @@ def get_order_list(request):
                 "date": order.date,
                 "court_type": order.court_type,
                 "price": order.price,
+                "user_nick_name": order.user_nick_name,
                 "time_list": ast.literal_eval(order.time_list)
             })
         return JsonResponse(resp, safe=False, status=200)
@@ -489,6 +490,7 @@ def get_order_details(request, oid=None):
         resp["created_at"] = order.created_at
         resp["updated_at"] = order.updated_at
         resp["remark"] = order.remark
+        resp["user_nick_name"] = order.user_nick_name
         resp["time_list"] = ast.literal_eval(order.time_list)
 
         is_cancellable = check_if_order_is_cancellable(order)
