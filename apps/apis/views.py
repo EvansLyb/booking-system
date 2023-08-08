@@ -19,7 +19,7 @@ from apps.apis.models import User
 from apps.authentication.models import Account
 from utils.payment import unified_order
 from utils.sms import send_sms
-from utils.util import get_freeze_weights_by_court_type, generate_order_no, generate_trade_no, get_order_no_by_trade_no
+from utils.util import get_freeze_weights_by_court_type, generate_order_no, generate_trade_no, get_order_no_by_trade_no, trans_list_str_to_list
 from utils.order import calc_unpay_amount, freeze, unfreeze, check_if_order_is_cancellable
 
 
@@ -521,6 +521,8 @@ def cancel_order(request):
 
         order.status = OrderStatus.CANCELLED
         order.save()
+        """ === data unfreeze === """
+        unfreeze(order.facility_id, order.date, trans_list_str_to_list(order.time_list), order.court_type)
         return JsonResponse(resp, safe=False, status=200)
 
 
