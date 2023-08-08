@@ -80,6 +80,7 @@
                   <tr>
                     <th>Order ID</th>
                     <th>Phone Number</th>
+                    <th>Contact Person</th>
                     <th>Facility</th>
                     <th>Date</th>
                     <th>Court Type</th>
@@ -95,6 +96,7 @@
                   <tr>
                     <td><a href="/dashboard/order/{{ order.order_no }}">{{ order.order_no }}</a></td>
                     <td>{{ order.phone_number }}</td>
+                    <td>{{ order.user_nick_name }}</td>
                     <td>{{ order.facility_name }}</td>
                     <td>{{ order.date|date:"Y-m-d" }}</td>
                     <td>{{ order.court_type }}</td>
