@@ -130,6 +130,33 @@ def check_phone_number(request):
         }, safe=False, status=200)
 
 
+def user_nick_name(request):
+    open_id = request.headers.get('X-Wx-Openid', '')
+    if not open_id:
+        return JsonResponse({}, safe=False, status=400)
+    user = User.objects.filter(open_id=open_id).first()
+
+    if request.method == 'GET':
+        if not user:
+            return JsonResponse({}, safe=False, status=404)
+        return JsonResponse({
+            "nick_name": user.nick_name
+        }, safe=False, status=200)
+
+    if request.method == 'POST':
+        json_data = json.loads(request.body)
+        nick_name = json_data.get('nick_name', "")
+        if not user:
+            User.objects.create(
+                open_id=open_id,
+                nick_name=nick_name
+            )
+        else:
+            user.nick_name = nick_name
+            user.save()
+        return JsonResponse({"errcode": 0, "errmsg": ""}, safe=False, status=201)
+
+
 def get_price_info(request, fid=None):
     if request.method == 'GET':
         resp = {}

@@ -92,7 +92,7 @@ class Freeze(models.Model):
     """
     lock_count = models.IntegerField('lock_count', default=0)
     is_order = models.BooleanField(default=False)
-    time = models.TimeField()  # start time, slot=30min
+    time = models.TimeField()  # start time
 
 
 class OrderStatus(models.TextChoices):
