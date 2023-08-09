@@ -13,8 +13,7 @@ UNPAID_ORDER_SURVIVAL_TIME = 15
 def automatic_cancellation_of_unpaid_orders():
     while True:
         try:
-            now = now()
-            local_time = now.strftime('%Y-%m-%d %H:%M:%S')
+            local_time = now().strftime('%Y-%m-%d %H:%M:%S')
             print('local time：' + str(local_time))
             unpaid_order_list = UnpaidOrder.objects.all()
             if unpaid_order_list and len(unpaid_order_list) > 0:
@@ -23,7 +22,7 @@ def automatic_cancellation_of_unpaid_orders():
                     if order.status != OrderStatus.PENDING_PAYMENT:
                         unpaid_order.delete()
                     else:
-                        if (now - order.created_at).seconds > UNPAID_ORDER_SURVIVAL_TIME:
+                        if (now() - order.created_at).seconds > UNPAID_ORDER_SURVIVAL_TIME:
                             # cancel this order
                             is_cancellable = check_if_order_is_cancellable(order)
                             if is_cancellable:
