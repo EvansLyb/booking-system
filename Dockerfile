@@ -30,9 +30,7 @@ RUN pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
 # running migrations
 && python3 manage.py migrate \
 # create super user
-&& python3 manage.py initadmin \
-# start cronjob
-&& python3 manage.py cronjob
+&& python3 manage.py initadmin 
 
 # 暴露端口
 # 此处端口必须与「服务设置」-「流水线」以及「手动上传代码包」部署时填写的端口一致，否则会部署失败。
