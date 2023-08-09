@@ -1,6 +1,7 @@
 import os, sys, time, datetime
 import threading
 from django.core.management.base import BaseCommand
+from django.utils.timezone import now
 
 from apps.dashboard.models import Order, UnpaidOrder, OrderStatus
 from utils.order import check_if_order_is_cancellable, unfreeze
@@ -12,7 +13,7 @@ UNPAID_ORDER_SURVIVAL_TIME = 15
 def automatic_cancellation_of_unpaid_orders():
     while True:
         try:
-            now = datetime.datetime.now()
+            now = now()
             local_time = now.strftime('%Y-%m-%d %H:%M:%S')
             print('local time：' + str(local_time))
             unpaid_order_list = UnpaidOrder.objects.all()
