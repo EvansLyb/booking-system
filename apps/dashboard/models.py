@@ -125,6 +125,13 @@ class Order(models.Model):
         return facility_name
 
 
+"""
+In order to automatically cancel overdue unpaid orders
+"""
+class UnpaidOrder(models.Model):
+    order_id = models.BigIntegerField('order_id', blank=False, null=False)
+
+
 class BillType(models.TextChoices):
     PAYMENT = "Payment"
     REFUND = "Refund"

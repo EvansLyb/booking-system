@@ -14,7 +14,7 @@ import datetime
 import ast
 from decimal import Decimal
 
-from apps.dashboard.models import Facility, Stadium, StadiumImage, FacilityCoverImage, Price, Freeze, Order, Bill, OrderStatus, BillType
+from apps.dashboard.models import Facility, Stadium, StadiumImage, FacilityCoverImage, Price, Freeze, Order, Bill, OrderStatus, BillType, UnpaidOrder
 from apps.apis.models import User
 from apps.authentication.models import Account
 from utils.payment import unified_order
@@ -309,6 +309,8 @@ def create_order(request):
                 remark=remark,
                 user_nick_name=user_nick_name
             )
+            # create an unpaid order record after order is created
+            UnpaidOrder.objects.create(order_id=order.id)
             """ send sms """
             try:
                 admin_list = Account.objects.all()
