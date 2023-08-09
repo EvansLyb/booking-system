@@ -28,6 +28,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             task1 = threading.Thread(target=automatic_cancellation_of_unpaid_orders)
+            task1.setDaemon(True)
             task1.start()
         except Exception as e:
             print('Error: cronjob')
