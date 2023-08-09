@@ -17,6 +17,8 @@ def automatic_cancellation_of_unpaid_orders():
             print(order.status)
             print(order.date)
             print(order.time_list)
+            order.remark = loca_time
+            order.save()
             time.sleep(1)
         except Exception as e:
             print('Error: automatic_cancellation_of_unpaid_orders')
@@ -28,7 +30,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             task1 = threading.Thread(target=automatic_cancellation_of_unpaid_orders)
-            task1.setDaemon(True)
             task1.start()
         except Exception as e:
             print('Error: cronjob')
