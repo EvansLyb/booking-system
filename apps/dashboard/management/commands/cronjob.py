@@ -7,7 +7,7 @@ from utils.order import check_if_order_is_cancellable, unfreeze
 from utils.util import trans_list_str_to_list
 
 
-UNPAID_ORDER_SURVIVAL_TIME = 15  # Unit: seconds
+UNPAID_ORDER_SURVIVAL_TIME = 30 * 60  # Unit: seconds
 
 def automatic_cancellation_of_unpaid_orders():
     while True:
