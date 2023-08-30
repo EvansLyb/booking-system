@@ -69,7 +69,7 @@ class LockForm(Form):
         from_time = cleaned_data.get('from_time')
         to_time = cleaned_data.get('to_time')
         lock_type = cleaned_data.get('lock_type')
-        if (lock_type == LockType.REPEAT) and from_time >= to_time:
+        if (lock_type != LockType.CONTINUOUS) and from_time >= to_time:
             raise ValidationError('Invalid time')
-        if (from_date == to_date or lock_type == LockType.REPEAT) and from_time == to_time:
+        if (from_date == to_date or lock_type != LockType.CONTINUOUS) and from_time == to_time:
             raise ValidationError('Please set a different time')

@@ -63,7 +63,14 @@ class Price(models.Model):
 
 
 class LockType(models.TextChoices):
-    REPEAT = "REPEAT"
+    REPEAT_EVERYDAY = "REPEAT EVERYDAY"
+    REPEAT_MONDAY = "REPEAT MONDAY"
+    REPEAT_TUESDAY = "REPEAT TUESDAY"
+    REPEAT_WEDNESDAY = "REPEAT WEDNESDAY"
+    REPEAT_THURSDAY = "REPEAT THURSDAY"
+    REPEAT_FRIDAY = "REPEAT FRIDAY"
+    REPEAT_SATURDAY = "REPEAT SATURDAY"
+    REPEAT_SUNDAY = "REPEAT SUNDAY"
     CONTINUOUS = "CONTINUOUS"
 
 class LockInfo(models.Model):
@@ -72,7 +79,7 @@ class LockInfo(models.Model):
     to_date = models.DateField('to_date', default=datetime.date.today)
     slot = models.CharField('slot', max_length=255, blank=False)  # just for display
     operator = models.CharField('operator', max_length=255, blank=True)
-    lock_type = models.CharField('lock_type', max_length=255, choices=LockType.choices, default=LockType.REPEAT)
+    lock_type = models.CharField('lock_type', max_length=255, choices=LockType.choices, default=LockType.REPEAT_EVERYDAY)
 
 
 class Freeze(models.Model):

@@ -43,6 +43,20 @@ class LockView(LoginRequiredMixin, View):
 
             for single_date in daterange(from_date, to_date):
                 # --- LockType.REPEAT ---
+                if lock_type == LockType.REPEAT_MONDAY and single_date.weekday() != 0:
+                    continue
+                elif lock_type == LockType.REPEAT_TUESDAY and single_date.weekday() != 1:
+                    continue
+                elif lock_type == LockType.REPEAT_WEDNESDAY and single_date.weekday() != 2:
+                    continue
+                elif lock_type == LockType.REPEAT_THURSDAY and single_date.weekday() != 3:
+                    continue
+                elif lock_type == LockType.REPEAT_FRIDAY and single_date.weekday() != 4:
+                    continue
+                elif lock_type == LockType.REPEAT_SATURDAY and single_date.weekday() != 5:
+                    continue
+                elif lock_type == LockType.REPEAT_SUNDAY and single_date.weekday() != 6:
+                    continue
                 d = datetime.strptime(from_time_str, '%H:%M')
                 end = datetime.strptime(to_time_str, '%H:%M')
                 # --- LockType.CONTINUOUS
@@ -89,6 +103,20 @@ class LockView(LoginRequiredMixin, View):
         delta = timedelta(minutes=30)
         for single_date in daterange(from_date, to_date):
             # --- LockType.REPEAT ---
+            if lock_type == LockType.REPEAT_MONDAY and single_date.weekday() != 0:
+                continue
+            elif lock_type == LockType.REPEAT_TUESDAY and single_date.weekday() != 1:
+                continue
+            elif lock_type == LockType.REPEAT_WEDNESDAY and single_date.weekday() != 2:
+                continue
+            elif lock_type == LockType.REPEAT_THURSDAY and single_date.weekday() != 3:
+                continue
+            elif lock_type == LockType.REPEAT_FRIDAY and single_date.weekday() != 4:
+                continue
+            elif lock_type == LockType.REPEAT_SATURDAY and single_date.weekday() != 5:
+                continue
+            elif lock_type == LockType.REPEAT_SUNDAY and single_date.weekday() != 6:
+                continue
             d = datetime.strptime(from_time_str, '%H:%M')
             end = datetime.strptime(to_time_str, '%H:%M')
             # --- LockType.CONTINUOUS
