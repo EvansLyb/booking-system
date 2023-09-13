@@ -129,6 +129,8 @@ class PriceView(LoginRequiredMixin, View):
             return HttpResponse(html_template.render({"form": form, "fid": fid}, request))
 
         price = Price.objects.get(facility_id=fid, id=pid)
+        price.normal_hourly_price = price.normal_hourly_price * 2 if price.normal_hourly_price else 0
+        price.peek_hourly_price = price.peek_hourly_price * 2 if price.peek_hourly_price else 0
         form = PriceForm(request.POST or None, instance=price)
         html_template = loader.get_template('dashboard/price-form.html')
         return HttpResponse(html_template.render({"form": form, "fid": fid}, request))
