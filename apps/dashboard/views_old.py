@@ -174,8 +174,8 @@ class PriceView(LoginRequiredMixin, View):
                 price.opening_time = opening_time
                 price.closing_time = closing_time
                 price.full_day_price = clean_price(full_day_price)
-                price.normal_hourly_price = clean_price(normal_hourly_price)
-                price.peek_hourly_price = clean_price(peek_hourly_price)
+                price.normal_hourly_price = clean_price(normal_hourly_price) / 2
+                price.peek_hourly_price = clean_price(peek_hourly_price) / 2
                 price.peek_time_from = peek_time_from
                 price.peek_time_to = peek_time_to
             else:
@@ -194,8 +194,8 @@ class PriceView(LoginRequiredMixin, View):
                     opening_time=opening_time,
                     closing_time=closing_time,
                     full_day_price=clean_price(full_day_price),
-                    normal_hourly_price=clean_price(normal_hourly_price),
-                    peek_hourly_price=clean_price(peek_hourly_price),
+                    normal_hourly_price=clean_price(normal_hourly_price) / 2,
+                    peek_hourly_price=clean_price(peek_hourly_price) / 2,
                     peek_time_from=peek_time_from,
                     peek_time_to=peek_time_to
                 )

@@ -56,8 +56,8 @@ class Price(models.Model):
     opening_time = models.TimeField()
     closing_time = models.TimeField()
     full_day_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0), null=True)
-    normal_hourly_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0))
-    peek_hourly_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0), null=True)
+    normal_hourly_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0))  # Actually the price is stored for half an hour
+    peek_hourly_price = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal(0), null=True)  # Actually the price is stored for half an hour
     peek_time_from = models.TimeField(null=True)
     peek_time_to = models.TimeField(null=True)
 

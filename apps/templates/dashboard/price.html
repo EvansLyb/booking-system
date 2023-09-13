@@ -36,8 +36,8 @@
                     <td>{{ price.court_type }}</td>
                     <td>{{ price.day_type }}</td>
                     <td>{{ price.full_day_price|default_if_none:"-" }}</td>
-                    <td>{{ price.normal_hourly_price }}</td>
-                    <td>{{ price.peek_hourly_price }}</td>
+                    <td>{% widthratio price.normal_hourly_price 2 1 %}</td>
+                    <td>{% widthratio price.peek_hourly_price 2 1 %}</td>
                     <td>{{ price.peek_time_from|default_if_none:"" }} - {{ price.peek_time_to|default_if_none:"" }}</td>
                     <td>{{ price.opening_time }}</td>
                     <td>{{ price.closing_time }}</td>
