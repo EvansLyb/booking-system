@@ -19,10 +19,7 @@ services:
       - MYSQL_DATABASE=booking
       - MYSQL_USERNAME=booking
       - MYSQL_PASSWORD=book123@
-      - MYSQL_ADDRESS=10.21.111.42:3306
-      - MYSQL_USERNAME=
-      - MYSQL_PASSWORD=
-      - MYSQL_ADDRESS=
+      - MYSQL_ADDRESS=10.17.107.99:3306
 networks:
   default:
     external:

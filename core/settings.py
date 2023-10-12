@@ -119,8 +119,8 @@ else:
             'ENGINE': 'django.db.backends.mysql',
             'NAME': "booking",
             'USER': "booking",
-            'HOST': "10.17.107.99:3306".split(':')[0],
-            'PORT': "10.17.107.99:3306".split(':')[1],
+            'HOST': "sh-cynosdbmysql-grp-ijy0olzq.sql.tencentcdb.com:22155".split(':')[0],
+            'PORT': "sh-cynosdbmysql-grp-ijy0olzq.sql.tencentcdb.com:22155".split(':')[1],
             'PASSWORD': "book123@",
             'OPTIONS': {'charset': 'utf8mb4'},
         }
