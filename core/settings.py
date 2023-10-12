@@ -164,7 +164,7 @@ USE_L10N = True
 USE_TZ = True
 
 #############################################################
-CLOUD_ENV = "prod-7gol3cjtf90db7de"
+CLOUD_ENV = "prod-0gkrif4afa615ca5"
 MCH_ID = "1624257481"
 SERVICE = "booking-system"
 APP_ID = "wx07aa26735a64ea3a"
