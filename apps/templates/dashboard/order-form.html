@@ -509,7 +509,7 @@
     $('.timepicker').datetimepicker({
       datepicker: false,
       format: 'H:i',
-      step: 30,
+      step: 60,
       theme: 'dark',
       onSelectTime: function(time) {
         const newTimeStr = `${time.getHours()}:${('0'+time.getMinutes()).slice(-2)}`
@@ -517,7 +517,7 @@
         if ($('#id_time_list').val().includes(newTimeStr)) return
 
         // update time slot list
-        const timeAfter = new Date(time.getTime() + (30 * 60 * 1000))
+        const timeAfter = new Date(time.getTime() + (60 * 60 * 1000))
         const timeAfterStr = `${timeAfter.getHours()}:${('0'+timeAfter.getMinutes()).slice(-2)}`
         $('#time-slot-list').append(`<div class="time-slot-tag d-flex" style="color: #e0e0e0;border: 1px solid #e0e0e0;padding: 3px 6px;margin-bottom:2px;margin-right: 12px;"><div>${newTimeStr} - ${timeAfterStr}</div><div class="delete-time-slot" data-time="${newTimeStr}"></div>`)
         bindTimeSlotDeleteEvent()

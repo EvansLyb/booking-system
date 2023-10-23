@@ -37,7 +37,7 @@ def get_order_no_by_trade_no(trade_no):
 def trans_time_to_slot(time_str):
     from_time_str = time_str
     from_time = datetime.datetime.strptime(time_str, '%H:%M')
-    delta = datetime.timedelta(minutes=30)
+    delta = datetime.timedelta(minutes=60)
     to_time = from_time + delta
     to_time_str = datetime.time(hour=to_time.hour, minute=to_time.minute).isoformat(timespec='minutes')
     return "{} - {}".format(from_time_str, to_time_str)
