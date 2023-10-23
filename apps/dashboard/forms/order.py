@@ -34,7 +34,6 @@ class OrderForm(ModelForm):
         ))
     facility_id = forms.ChoiceField(
         required=True,
-        choices=[(facility.id, facility.name) for facility in Facility.objects.all()],
         widget=forms.Select(
             attrs={
                 "class": "form-control",
@@ -93,6 +92,11 @@ class OrderForm(ModelForm):
                 "disabled": True
             }
         ))
+
+    def __init__(self, *args, **kwargs):
+        super(OrderForm, self).__init__(*args, **kwargs)
+        self.fields['facility_id'].choices = Facility.objects.values_list('id', 'name')
+
 
     class Meta:
         model = Order
